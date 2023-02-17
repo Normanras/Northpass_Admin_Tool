@@ -1,0 +1,39 @@
+{% extends 'head.html' %}
+{% block content %}
+<body>
+    <div class="container">
+      <header class="header">
+        <div>
+          <h1>Hello there, <span id="userName">CUSTOMER SUCCESS MANAGER</span>.</h1>
+	    <img src="/static/NP-Logo-Primary-FC.png" alt="Northpass Full Color Logo"></img>
+          <p>Today is <span id="currentDate">Monday 1, January 2000</span>.</p>
+        </div>
+	<p id="currentTime">{{ request.form.apikey }}</p>
+      </header>
+	<h4>Hello! Please select what you'd like to do.</h4>
+		<main id="cardContainer">
+		    <form class="card"
+		    action="{{ url_for('get_courses')}}"
+		    method="post">
+		    <a class="card"
+		      onclick="document.forms[0].submit()"
+		      style="cursor:pointer;">
+		    <i class="ri-plane-line card__icon"></i>
+		    <p class="card__name">Get Fucked</p>
+		    </a>
+		    </form>
+		<main id="cardContainer">
+		    <form class="card"
+		    action="{{ url_for('get_courses')}}"
+		    method="post">
+		    <a class="card"
+		      onclick="document.forms[0].submit()"
+		      style="cursor:pointer;">
+		    <i class="ri-plane-line card__icon"></i>
+		    <p class="card__name">Get Fucked</p>
+		    </a>
+		    </form>
+		  </main>
+    </div>
+  </body>
+  {% endblock %}

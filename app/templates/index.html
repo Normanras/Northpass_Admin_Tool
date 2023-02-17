@@ -1,0 +1,20 @@
+{% extends 'head.html' %}
+{% block content %}
+<body>
+    <div class="container">
+      <header class="header">
+        <div>
+          <h1>Hello there, CUSTOMER SUCCESS MANAGER.</h1>
+	    <img src="/static/NP-Logo-Primary-FC.png" alt="Northpass Full Color Logo"></img>
+      </header>
+	<h4>Hello! Please click below to enter your key.</h4>
+	{% if error %}
+	<p class=error><strong>Error!  </strong>{{ error }}
+	{% endif %}
+	  <form action="{{ url_for("ask_key")}}" method="post">
+	    <input type="text" name="apikey">
+	    <input type="submit" value="Submit">
+	 </form>
+    </div>
+  </body>
+  {% endblock %}

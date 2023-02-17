@@ -1,0 +1,167 @@
+
+/* Custom Variables | Color Scheme */
+
+:root {
+  --primary:  #fff;
+  --text-light: #E5E9F0;
+  --background: #3B4252;
+  --background-light: #4C566A;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+body {
+  margin-bottom: 0;
+  flex-grow: 1;
+  background: linear-gradient(
+    145deg, #81A1C1, #88C0D0, #8FBCBB, #A3BE8C, #EBCB8B, #D08770
+  );
+  background-size: 700% 550%;
+  animation: gradient 7s ease-in-out infinite;
+  height: 125vh;
+  margin-top: -100px;
+  padding-top: 100px;
+  color: var(--text-light);
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 2rem 4rem;
+  background-color: var(--background);
+  box-sizing: border-box;
+}
+
+@keyframes gradient {
+  0% {
+	  background-position: 0% 79%;
+  }
+  50% {
+	  background-position: 100% 22%;
+  }
+  100% {
+	  background-position: 0% 79%;
+  }
+}
+
+h1 {
+  font-size: 4rem;
+  font-weight: bold;
+}
+
+h1 > span {
+  color: var(--primary);
+}
+
+h4 {
+  align-items: center;
+  text-align: center;
+}
+
+img {
+  height: 50px;
+  width 500px;
+  align-items: flex-start;
+}
+main {
+  margin: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.header {
+  font-weight: 200;
+  margin-top: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#currentDate {
+  color: var(--primary);
+}
+
+#currentTime {
+  font-size: 4rem;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 1250px) {
+  h1 {
+    display: none;
+  }
+
+  .header {
+    flex-direction: column-reverse;
+  }
+
+  #currentTime {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  #fullDate {
+    text-align: center;
+  }
+}
+
+.card:link,
+.card:visited {
+  color: white;
+  text-decoration: none;
+
+  margin: 1.2rem;
+  padding: 4rem 8rem;
+
+  background-color: var(--background-light);
+  border-radius: 15px;
+  border: 1px solid #B48EAD;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+
+  outline: none;
+  transition: 0.1s;
+}
+
+.card:hover,
+.card:focus {
+  border-color: var(--primary);
+  color: var(--primary);
+
+  transform: scale(1.02);
+}
+
+.card:focus > .card__name {
+  bottom: 0;
+}
+
+.card:hover > .card__name {
+  bottom: 0;
+}
+
+.card__icon {
+  font-size: 2rem;
+  padding: 1rem;
+  background-color: #81A1C1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.card__name {
+  font-weight: 400;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  bottom: -25%;
+  left: 50%;
+  transition: 0.1s;
+}
