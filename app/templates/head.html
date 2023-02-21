@@ -9,12 +9,30 @@
       rel="stylesheet"
     />
 
-    <title>CSM Bulk Actions</title>
+    <title>CSM Bulk App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
 	rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename="css/styles.css") }}" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   </head>
+<body>
+  <div class="three-verts">
+    <div class="container">
+      <header class="header">
+        <div class="main">
+	  <a href="{{ url_for('render_home')}}">
+	    <img
+	    src="{{ url_for('static', filename="NP-Logo-Primary-FC.png") }}"
+	    alt="Northpass Full Color Logo"
+	    >
+	    </img></a>
+      </header>
+	</div>
+	{% for message in get_flashed_messages() %}
+	<h2> {{ message }} </h2>
+	{% endfor %}
 {% block content %} {% endblock %}
 </html>

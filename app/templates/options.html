@@ -27,14 +27,11 @@
 		    </a>
 		    </form>
 
-		    <div class="card"
-			  href = "/add"
-			  >
-		    <a class="a-card"
-		      onclick="document.forms['bulk_add'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-plane-line card__icon"></i>
-		    <p class="card__name">Get Courses</p>
+      <div class="card" >
+		    <a class="a-card" href="{{ url_for('add_options')}}"
+		      style="cursor:pointer; color: inherit; text-decoration: none">
+		    <i class="ri-building-line card__icon"></i>
+		    <p class="card__name">Bulk Add</p>
 		    </a>
 
 

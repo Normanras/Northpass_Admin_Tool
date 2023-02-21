@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{% extends 'head.html' %}
+{% block content %}
+	<h4>Hello! Please enter the emails below.</h4>
+	{% if error %}
+	<p class=error><strong> </strong>{{ error }}
+	{% endif %}
+
+	<p><label for="Bulk Add"> Please select the appropriate options below.</label></p>
+	  <form action="{{ url_for("bulk_add")}}" method="post">
+	    <p>Please Copy and Paste Emails of learners you'd like to add</p>
+	    <textarea id="emails" name="emails" rows="4" cols="50"></textarea>
+	    <p>Please select which Groups these learners should be added to. </p>
+	    <select name="groups" id="groups" multiple>
+	      <option></option>
+	      <input type="submit" value="Submit"></select>
+	 </form>
+
+    </div>
+  </div>
+  </body>
+  <script src="{{ url_for('static', filename='getallgroups.js')}}"></script>
+  {% endblock %}
+
