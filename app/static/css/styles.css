@@ -58,7 +58,7 @@ select {
   --webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-/*
+
 .dataframe {
   font-size: 11pt;
   border-collapse: collapse;
@@ -72,13 +72,12 @@ select {
 }
 
 .dataframe tr:nth-child(even) {
-  background: #193D4F;
+  background: #CCE8EE;
 }
 
 .dataframe tr:hover {
-  background: #096F8E;
-  cursor: pointer;
-}*/
+  background: #CCD4D8;
+}
 
 h1 {
   font-size: 4rem;

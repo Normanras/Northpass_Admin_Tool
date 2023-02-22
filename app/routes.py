@@ -2,6 +2,7 @@ from app import app
 from flask import request, Flask, flash, render_template, session, make_response
 import requests
 import json
+import itertools
 import pandas as pd
 import re
 
@@ -32,6 +33,7 @@ def render_home():
 @app.route("/get_courses", methods=["GET", "POST"])
 def get_courses():
     array = []
+    course_dict = {}
     df = pd.DataFrame()
     tempdf = pd.DataFrame()
     pd.set_option("display.max_colwidth", 100)
@@ -44,20 +46,24 @@ def get_courses():
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
             jsonresponse = response.json()
-            dt = jsonresponse["data"]
-            next = jsonresponse["links"]
+            data = response.json()
+            nextlink = data["links"]
 
-            for course in dt:
-                df = df.append(course["attributes"], ignore_index=True)
-            # df = df.drop("list_image_url", axis=1)
+            for response in data["data"]:
+                uuid = response["id"]
+                course_dict = {"id": uuid}
+                for keys, values in response["attributes"].items():
+                    course_dict[keys] = values
+                array.append(course_dict)
+                dataframe = pd.DataFrame(array).drop("list_image_url", axis=1)
+            print(dataframe)
 
-            if "next" not in next:
+            if "next" not in nextlink:
                 break
 
-        dfhtml = df.to_html(col_space=5)
-        session["dfcsv"] = df.to_csv()
-        return render_template("table.html", tables=dfhtml, titles="Course List")
-
+        dfcourse = dataframe.to_html()
+        session["dfcsv"] = dataframe.to_csv()
+        return render_template("table.html", table=dfcourse, title="List of Courses")
     else:
         return "This isn't working. Let's go our own way."
 
@@ -79,6 +85,7 @@ def download_csv():
 @app.route("/get_people", methods=["GET", "POST"])
 def get_people():
     array = []
+    ppl_dict = {}
     df = pd.DataFrame()
     x = 0
 
@@ -88,28 +95,32 @@ def get_people():
             url = f"https://api.northpass.com/v2/people?page={x}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
-            jsonresponse = response.json()
-            dt = jsonresponse["data"]
-            next = jsonresponse["links"]
+            data = response.json()
+            nextlink = data["links"]
 
-            for person in dt:
-                print(person)
-                df = df.append(person["attributes"], ignore_index=True)
+            for response in data["data"]:
+                uuid = response["id"]
+                ppl_dict = {"id": uuid}
+                for keys, values in response["attributes"].items():
+                    ppl_dict[keys] = values
+                array.append(ppl_dict)
+                dataframe = pd.DataFrame(array).drop("custom_avatar_url", axis=1)
+            print(dataframe)
 
-            if "next" not in next:
+            if "next" not in nextlink:
                 break
 
-        dfppl = df.to_html(col_space=5)
-        session["dfcsv"] = df.to_csv()
-        return render_template("table.html", tables=dfppl, titles="People List")
-
+        dfppl = dataframe.to_html()
+        session["dfcsv"] = dataframe.to_csv()
+        return render_template("table.html", table=dfppl, title="List of People")
     else:
         return "what what"
 
 
-@app.route("/add_options", methods=["POST"])
-def add_options():
+@app.route("/add_ppl_options", methods=["POST"])
+def add_ppl_options():
     array = []
+    dict_response = {}
     df = pd.DataFrame()
     x = 0
     if request.method == "POST":
@@ -118,48 +129,118 @@ def add_options():
             url = f"https://api.northpass.com/v2/groups?page={x}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
-            data = response.text
-            df = pd.json_normalize(data)
-            print(df)
+            data = response.json()
+            nextlink = data["links"]
 
-            # print(type(response))
-            # print(response)
-            # jsonresponse = response.json()
-            # dt = jsonresponse["data"]
-            # next = jsonresponse["links"]
+            for response in data["data"]:
+                uuid = response["id"]
+                dict_response = {"id": uuid}
+                for keys, values in response["attributes"].items():
+                    dict_response[keys] = values
+                array.append(dict_response)
+                dataframe = pd.DataFrame(array).drop("group_enrollment_link", axis=1)
+            print(dataframe)
 
-            for group in dt:
-                df = df.from_dict(group["attributes"], orient="index")
-                # df = df.append(group["id"], ignore_index=True)
-                # df = df.append(group["attributes"], ignore_index=True)
-
-            if "next" not in next:
+            if "next" not in nextlink:
                 break
 
-        print(df)
-        session["dfcsv"] = df.to_csv()
-        dfgroups = df.to_html(col_space=5)
+        dfgroups = dataframe.to_html()
+        session["dfcsv"] = dataframe.to_csv()
         return render_template(
-            "bulk_add.html", tables=dfgroups, titles="Bulk Add Learners"
+            "bulk_add_ppl.html", table=dfgroups, titles="Bulk Add Learners"
         )
+    else:
+        return "This isn't working. Let's go our own way."
 
 
-@app.route("/bulk_add", methods=["GET", "POST"])
-def bulk_add():
+@app.route("/bulk_add_ppl", methods=["GET", "POST"])
+def bulk_add_ppl():
+    emailarr = []
+    grouparr = []
     if request.method == "POST":
         emails = request.form.get("emails")
         groups = request.form.get("groups")
+        emails = emails.split(",")
+        groups = groups.split(",")
         url = "https://api.northpass.com/v2/bulk/people"
-
+        combinations = list(itertools.product(emails, groups))
+        print(combinations)
         payload = {
             "data": {"attributes": {"people": [{"email": emails, "groups": groups}]}}
         }
-
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
             "X-Api-Key": session["key"],
         }
+    return payload
+
+
+@app.route("/add_groups_options", methods=["POST"])
+def add_groups_options():
+    array = []
+    dict_response = {}
+    df = pd.DataFrame()
+    x = 0
+    if request.method == "POST":
+        while True:
+            x += 1
+            url = f"https://api.northpass.com/v2/groups?page={x}"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            nextlink = data["links"]
+
+            for response in data["data"]:
+                uuid = response["id"]
+                dict_response = {"id": uuid}
+                for keys, values in response["attributes"].items():
+                    dict_response[keys] = values
+                array.append(dict_response)
+                dataframe = pd.DataFrame(array).drop("group_enrollment_link", axis=1)
+            print(dataframe)
+
+            if "next" not in nextlink:
+                break
+
+        dfgroups = dataframe.to_html()
+        session["dfcsv"] = dataframe.to_csv()
+        return render_template(
+            "bulk_add_groups.html", table=dfgroups, titles="Bulk Add Groups"
+        )
+    else:
+        return "This isn't working. Let's go our own way."
+
+
+@app.route("/bulk_add_groups", methods=["GET", "POST"])
+def bulk_add_groups():
+    grouparr = []
+    groupdict = {}
+    i = 0
+    if request.method == "POST":
+        groups = request.form.get("groups")
+        if "\n" in groups:
+            groups = groups.split("\n")
+            groups = [group.strip() for group in groups]
+        elif "," in groups:
+            groups = groups.split(",")
+            groups = [group.strip() for group in groups]
+        for group in groups:
+            print(group)
+            groupdict["name"] = group
+            grouparr.append(groupdict)
+            print(groupdict)
+            print(grouparr)
+
+        print(grouparr)
+        url = "https://api.northpass.com/v2/bulk/people"
+        payload = {"data": {"attributes": {"groups": grouparr}}}
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-Api-Key": session["key"],
+        }
+    return payload
 
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
