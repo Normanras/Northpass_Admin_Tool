@@ -49,7 +49,7 @@ def get_courses():
 
             for course in dt:
                 df = df.append(course["attributes"], ignore_index=True)
-                df = df.drop("list_image_url", axis=1)
+            # df = df.drop("list_image_url", axis=1)
 
             if "next" not in next:
                 break
@@ -107,9 +107,41 @@ def get_people():
         return "what what"
 
 
-@app.route("/add_options")
+@app.route("/add_options", methods=["POST"])
 def add_options():
-    return render_template("bulk_add.html", title="Bulk Add Learners")
+    array = []
+    df = pd.DataFrame()
+    x = 0
+    if request.method == "POST":
+        while True:
+            x += 1
+            url = f"https://api.northpass.com/v2/groups?page={x}"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.text
+            df = pd.json_normalize(data)
+            print(df)
+
+            # print(type(response))
+            # print(response)
+            # jsonresponse = response.json()
+            # dt = jsonresponse["data"]
+            # next = jsonresponse["links"]
+
+            for group in dt:
+                df = df.from_dict(group["attributes"], orient="index")
+                # df = df.append(group["id"], ignore_index=True)
+                # df = df.append(group["attributes"], ignore_index=True)
+
+            if "next" not in next:
+                break
+
+        print(df)
+        session["dfcsv"] = df.to_csv()
+        dfgroups = df.to_html(col_space=5)
+        return render_template(
+            "bulk_add.html", tables=dfgroups, titles="Bulk Add Learners"
+        )
 
 
 @app.route("/bulk_add", methods=["GET", "POST"])

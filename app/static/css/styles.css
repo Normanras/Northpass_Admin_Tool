@@ -51,14 +51,14 @@ html {
 
 input,
 select {
-    width: 200px;
-    height: 25px;
-    margin: 2px;
-    --moz-box-sizing: border-box;
-    --webkit-box-sizing: border-box;
-    box-sizing: border-box;
+  width: 200px;
+  height: 25px;
+  margin: 2px;
+  --moz-box-sizing: border-box;
+  --webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
-
+/*
 .dataframe {
   font-size: 11pt;
   border-collapse: collapse;
@@ -78,7 +78,7 @@ select {
 .dataframe tr:hover {
   background: #096F8E;
   cursor: pointer;
-}
+}*/
 
 h1 {
   font-size: 4rem;

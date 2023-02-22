@@ -27,13 +27,16 @@
 		    </a>
 		    </form>
 
-      <div class="card" >
-		    <a class="a-card" href="{{ url_for('add_options')}}"
-		      style="cursor:pointer; color: inherit; text-decoration: none">
-		    <i class="ri-building-line card__icon"></i>
-		    <p class="card__name">Bulk Add</p>
+      <form class="card"
+		    id="add_options"
+		    action="{{ url_for('add_options')}}"
+		    method="post">
+		    <a class="a-card"
+		      onclick="document.forms['add_options'].submit()"
+		      style="cursor:pointer;">
+		    <i class="ri-send-plane-line card__icon"></i>
+		    <p class="card__name">Bulk Add People</p>
 		    </a>
-
 
     </div>
   </body>
