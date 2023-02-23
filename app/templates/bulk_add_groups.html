@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 {% extends 'head.html' %}
 {% block content %}
-	<h4>Hello! Please enter Group Names below.</h4>
+	<h2>Hello! Please enter Group Names below.</h2>
+	<p></p>
 	{% if error %}
-	<p class=error><strong> </strong>{{ error }}</p>
+	<h4 class=error><strong> </strong>{{ error }}</h4>
 	{% endif %}
-
-	<p><label for="Bulk Add Groups"> Please select the appropriate options below.</label></p>
+	<p></p>
+	<p><label for="Bulk Add Groups"> </label></p>
 	  <form action="{{ url_for("bulk_add_groups")}}" method="post">
 	    <p>Please enter a comma separated list of Groups you'd like to add</p>
 	    <textarea id="groups" name="groups" rows="4" cols="50"></textarea>

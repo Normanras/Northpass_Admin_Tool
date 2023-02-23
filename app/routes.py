@@ -203,10 +203,10 @@ def add_groups_options():
             if "next" not in nextlink:
                 break
 
-        dfgroups = dataframe.to_html()
+        session["dfgroups"] = dataframe.to_html()
         session["dfcsv"] = dataframe.to_csv()
         return render_template(
-            "bulk_add_groups.html", table=dfgroups, titles="Bulk Add Groups"
+            "bulk_add_groups.html", table=session["dfgroups"], titles="Bulk Add Groups"
         )
     else:
         return "This isn't working. Let's go our own way."
@@ -215,7 +215,6 @@ def add_groups_options():
 @app.route("/bulk_add_groups", methods=["GET", "POST"])
 def bulk_add_groups():
     grouparr = []
-    groupdict = {}
     i = 0
     if request.method == "POST":
         groups = request.form.get("groups")
@@ -226,21 +225,31 @@ def bulk_add_groups():
             groups = groups.split(",")
             groups = [group.strip() for group in groups]
         for group in groups:
-            print(group)
+            groupdict = {}
             groupdict["name"] = group
             grouparr.append(groupdict)
-            print(groupdict)
-            print(grouparr)
 
-        print(grouparr)
-        url = "https://api.northpass.com/v2/bulk/people"
+        url = "https://api.northpass.com/v2/bulk/groups"
         payload = {"data": {"attributes": {"groups": grouparr}}}
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
             "X-Api-Key": session["key"],
         }
-    return payload
+        response = requests.post(url, json=payload, headers=headers)
+        print(type(response))
+        response = str(response)
+        if "202" in response:
+            error = "Success! Groups have been added successfully."
+            return render_template("bulk_add_groups.html", table=session["dfgroups"], title="Groups Added", error=error)
+        elif "403" in response:
+            error = "Uh oh. Looks like you're not the admin or don't have appropriate privileges. Please talk to your academy admin."
+        elif "422" in response:
+            error = "Hm. Looks like something was wrong with the group names. Reach out to the manager of this app."
+            return render_template("bulk_add_groups.html", table=session["dfgroups"], title="Groups Added", error=error)
+        else:
+            error = "Shrug"
+            return render_template("bulk_add_groups.html", title="Shrug", error=error)
 
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
