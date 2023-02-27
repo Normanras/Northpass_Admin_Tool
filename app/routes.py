@@ -16,6 +16,12 @@ def ask_key():
             error = "Hm. That doesn't seem right"
             return render_template("index.html", title="Home", error=error)
         elif session["key"] is not None and len(session["key"]) > 10:
+            url = "https://api.northpass.com/v2/properties/school"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            session["school"] = data["data"]["attributes"]["properties"]["name"]
+            print(session["school"])
             return render_template("options.html", title="Options")
         else:
             error = "Hm. That doesn't seem right"
@@ -241,12 +247,22 @@ def bulk_add_groups():
         response = str(response)
         if "202" in response:
             error = "Success! Groups have been added successfully."
-            return render_template("bulk_add_groups.html", table=session["dfgroups"], title="Groups Added", error=error)
+            return render_template(
+                "bulk_add_groups.html",
+                table=session["dfgroups"],
+                title="Groups Added",
+                error=error,
+            )
         elif "403" in response:
             error = "Uh oh. Looks like you're not the admin or don't have appropriate privileges. Please talk to your academy admin."
         elif "422" in response:
             error = "Hm. Looks like something was wrong with the group names. Reach out to the manager of this app."
-            return render_template("bulk_add_groups.html", table=session["dfgroups"], title="Groups Added", error=error)
+            return render_template(
+                "bulk_add_groups.html",
+                table=session["dfgroups"],
+                title="Groups Added",
+                error=error,
+            )
         else:
             error = "Shrug"
             return render_template("bulk_add_groups.html", title="Shrug", error=error)
