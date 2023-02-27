@@ -4,6 +4,7 @@
 
 
 	<h4>Hello! Please find the options for {{ session.school }}.</h4>
+ <p></p>
     </div>
     <div class="card-grid">
 		    <form class="card"
@@ -28,27 +29,38 @@
 		    </a></form>
 
       <form class="card"
-		    id="add_ppl_options"
-		    action="{{ url_for('add_ppl_options')}}"
+		    id="add_ppl_opts"
+		    action="{{ url_for('add_ppl_opts')}}"
 		    method="post">
 		    <a class="a-card"
-		      onclick="document.forms['add_ppl_options'].submit()"
+		      onclick="document.forms['add_ppl_opts'].submit()"
 		      style="cursor:pointer;">
 		    <i class="ri-send-plane-line card__icon"></i>
 		    <p class="card__name">Bulk Add People</p>
 		    </a></form>
 
       <form class="card"
-		    id="add_groups_options"
-		    action="{{ url_for('add_groups_options')}}"
+		    id="add_groups_opts"
+		    action="{{ url_for('add_groups_opts')}}"
 		    method="post">
 		    <a class="a-card"
-		      onclick="document.forms['add_groups_options'].submit()"
+		      onclick="document.forms['add_groups_opts'].submit()"
 		      style="cursor:pointer;">
 		    <i class="ri-shape-2-line card__icon"></i>
 		    <p class="card__name">Bulk Add Groups</p>
       </a></form>
 
+      <form class="card"
+		    id="ppl_to_groups_opts"
+		    action="{{ url_for('ppl_to_groups_opts')}}"
+		    method="post">
+		    <a class="a-card"
+		      onclick="document.forms['ppl_to_groups_opts'].submit()"
+		      style="cursor:pointer;">
+		    <i class="ri-group-line card__icon"></i>
+		    <p class="card__name">Add Active People to Groups</p>
+
     </div>
   </body>
   {% endblock %}
+

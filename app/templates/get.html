@@ -1,43 +1,5 @@
 <!DOCTYPE html>
 {% extends 'head.html' %}
 {% block content %}
-	<h4>Hello! Please select what you'd like to do.</h4>
-    </div>
-    <div class="card-grid">
-		    <form class="card"
-		    action="{{ url_for('get_people')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms[0].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-car-line card__icon"></i>
-		    <p class="card__name">Get People</p>
-		    </a>
-		    </form>
-
-		    <form class="card"
-		    id="get_courses"
-		    action="{{ url_for('get_courses')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['get_courses'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-plane-line card__icon"></i>
-		    <p class="card__name">Get Courses</p>
-		    </a>
-		    </form>
-
-		    <div class="card"
-			  href = "/add"
-			  >
-		    <a class="a-card"
-		      onclick="document.forms['bulk_add'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-plane-line card__icon"></i>
-		    <p class="card__name">Get Courses</p>
-		    </a>
-
-
-    </div>
-  </body>
-  {% endblock %}
+{% include 'table.html' %}
+{% endblock %}

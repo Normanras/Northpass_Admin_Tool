@@ -4,7 +4,39 @@ import requests
 import json
 import itertools
 import pandas as pd
+from itables import show
 import re
+
+
+def handle_responses(response):
+    print(response.status_code)
+    print(response.text)
+    try:
+        response.raise_for_status()
+        print(response.raise_for_status())
+    except requests.exceptions as err:
+        return render_template("index.html", title="Error Home", error=err)
+        print(err)
+    finally:
+        return correct_key(response)
+
+
+def temp():
+    if "401" in str(response):
+        error = [
+            "Unauthorized access error. This can mean a lot of things.",
+            "Has the key changed, recently?",
+        ]
+        return render_template("index.html", title="Error Home", error=error)
+    else:
+        return correct_key(response)
+
+
+def correct_key(response):
+    data = response.json()
+    session["school"] = data["data"]["attributes"]["properties"]["name"]
+    print(session["school"])
+    return render_template("options.html", title="Options")
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -19,10 +51,7 @@ def ask_key():
             url = "https://api.northpass.com/v2/properties/school"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
-            data = response.json()
-            session["school"] = data["data"]["attributes"]["properties"]["name"]
-            print(session["school"])
-            return render_template("options.html", title="Options")
+            return handle_responses(response)
         else:
             error = "Hm. That doesn't seem right"
             return render_template("index.html", title="Home", error=error)
@@ -34,6 +63,20 @@ def ask_key():
 @app.route("/", methods=["GET", "POST"])
 def render_home():
     return render_template("index.html", title="Home")
+
+
+@app.route("/table")
+def table():
+    return render_template("table.html", tables=[session["dfhtml"]], titles=["Table"])
+
+
+@app.route("/downloadcsv", methods=["GET", "POST"])
+def download_csv():
+    if request.method == "GET":
+        download = make_response(session["dfcsv"])
+        download.headers["Content-Disposition"] = "attachment; filename=export.csv"
+        download.headers["Content-Type"] = "text/csv"
+        return download
 
 
 @app.route("/get_courses", methods=["GET", "POST"])
@@ -61,7 +104,11 @@ def get_courses():
                 for keys, values in response["attributes"].items():
                     course_dict[keys] = values
                 array.append(course_dict)
-                dataframe = pd.DataFrame(array).drop("list_image_url", axis=1)
+                dataframe = pd.DataFrame(array).drop(
+                                ["list_image_url", "permalink"],
+                                axis=1
+                            )
+                dataframe['full_description'] = dataframe['full_description'].str.replace(r'<[^<>]*>', '', regex=True)
             print(dataframe)
 
             if "next" not in nextlink:
@@ -69,23 +116,9 @@ def get_courses():
 
         dfcourse = dataframe.to_html()
         session["dfcsv"] = dataframe.to_csv()
-        return render_template("table.html", table=dfcourse, title="List of Courses")
+        return render_template("get.html", table=dfcourse, title="List of Courses")
     else:
         return "This isn't working. Let's go our own way."
-
-
-@app.route("/table")
-def table():
-    return render_template("table.html", tables=[session["dfhtml"]], titles=["Table"])
-
-
-@app.route("/downloadcsv", methods=["GET", "POST"])
-def download_csv():
-    if request.method == "GET":
-        download = make_response(session["dfcsv"])
-        download.headers["Content-Disposition"] = "attachment; filename=export.csv"
-        download.headers["Content-Type"] = "text/csv"
-        return download
 
 
 @app.route("/get_people", methods=["GET", "POST"])
@@ -117,14 +150,15 @@ def get_people():
                 break
 
         dfppl = dataframe.to_html()
+        dfshow = show(dfppl)
         session["dfcsv"] = dataframe.to_csv()
-        return render_template("table.html", table=dfppl, title="List of People")
+        return render_template("get.html", table=dfppl, title="List of People")
     else:
         return "what what"
 
 
-@app.route("/add_ppl_options", methods=["POST"])
-def add_ppl_options():
+@app.route("/add_ppl_opts", methods=["POST"])
+def add_ppl_opts():
     array = []
     dict_response = {}
     df = pd.DataFrame()
@@ -182,8 +216,8 @@ def bulk_add_ppl():
     return payload
 
 
-@app.route("/add_groups_options", methods=["POST"])
-def add_groups_options():
+@app.route("/add_groups_opts", methods=["POST"])
+def add_groups_opts():
     array = []
     dict_response = {}
     df = pd.DataFrame()
@@ -266,6 +300,29 @@ def bulk_add_groups():
         else:
             error = "Shrug"
             return render_template("bulk_add_groups.html", title="Shrug", error=error)
+
+
+@app.route("/ppl_to_groups_opts", methods=["GET", "POST"])
+def ppl_to_groups_opts():
+    pass
+
+
+@app.route("/ppl_to_groups", methods=["GET", "POST"])
+def ppl_to_groups():
+    person_ids = []
+    group_ids = []
+    url = "https://api.northpass.com/v2/bulk/people/membership"
+    payload = {
+        "payload": {
+            "person_ids": person_ids,
+            "group_ids": group_ids,
+        }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-Api-Key": session["key"],
+    }
 
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
