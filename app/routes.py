@@ -8,24 +8,14 @@ from itables import show
 import re
 
 
-def handle_responses(response):
-    print(response.status_code)
-    print(response.text)
-    try:
-        response.raise_for_status()
-        print(response.raise_for_status())
-    except requests.exceptions as err:
-        return render_template("index.html", title="Error Home", error=err)
-        print(err)
-    finally:
-        return correct_key(response)
-
-
-def temp():
-    if "401" in str(response):
+def key_response(response):
+    if "402" in str(response):
+        error = response.text
+        return render_template("index.html", title="Error Home", error=error)
+    elif "401" in str(response):
         error = [
-            "Unauthorized access error. This can mean a lot of things.",
-            "Has the key changed, recently?",
+            "Unauthorized access error. This can mean a lot of things, such as the key being changed.",
+            "Remember, they are paired to each educator!",
         ]
         return render_template("index.html", title="Error Home", error=error)
     else:
@@ -51,13 +41,18 @@ def ask_key():
             url = "https://api.northpass.com/v2/properties/school"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
-            return handle_responses(response)
+            return key_response(response)
         else:
             error = "Hm. That doesn't seem right"
             return render_template("index.html", title="Home", error=error)
 
     else:
         return render_template("index.html", title="Home")
+
+
+# @app.route("/", method="POST")
+# def upload_csv():
+#    pass
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -105,10 +100,11 @@ def get_courses():
                     course_dict[keys] = values
                 array.append(course_dict)
                 dataframe = pd.DataFrame(array).drop(
-                                ["list_image_url", "permalink"],
-                                axis=1
-                            )
-                dataframe['full_description'] = dataframe['full_description'].str.replace(r'<[^<>]*>', '', regex=True)
+                    ["list_image_url", "permalink"], axis=1
+                )
+                dataframe["full_description"] = dataframe[
+                    "full_description"
+                ].str.replace(r"<[^<>]*>", "", regex=True)
             print(dataframe)
 
             if "next" not in nextlink:
@@ -150,7 +146,6 @@ def get_people():
                 break
 
         dfppl = dataframe.to_html()
-        dfshow = show(dfppl)
         session["dfcsv"] = dataframe.to_csv()
         return render_template("get.html", table=dfppl, title="List of People")
     else:
@@ -213,7 +208,29 @@ def bulk_add_ppl():
             "content-type": "application/json",
             "X-Api-Key": session["key"],
         }
-    return payload
+        response = requests.post(url, json=payload, headers=headers)
+        response = str(response)
+        if "202" in response:
+            error = "Success! People have been added successfully."
+            return render_template(
+                "bulk_add_ppl.html",
+                table=session["dfgroups"],
+                title="People Added",
+                error=error,
+            )
+        elif "403" in response:
+            error = "Uh oh. Looks like you're not the admin or don't have appropriate privileges. Please talk to your academy admin."
+        elif "422" in response:
+            error = "Hm. Looks like something was wrong with the names. Reach out to the manager of this app."
+            return render_template(
+                "bulk_add_people.html",
+                table=session["dfgroups"],
+                title="People Added",
+                error=error,
+            )
+        else:
+            error = "Shrug"
+            return render_template("bulk_add_ppl.html", title="Shrug", error=error)
 
 
 @app.route("/add_groups_opts", methods=["POST"])

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+      <header class="header">
+
+	<ul class="header_opts">
+	  <form class="navbutton" action="{{ url_for('render_home')}}">
+	    <a href="{{ url_for('render_home')}}">
+	      <div class="icon-background">
+		<i class="ri-home-line"></i>
+	      </div>
+	      Home
+	    </a>
+	  </form>
+
+	  <form class="navbutton"
+	    action="{{ url_for('get_people')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['get_people'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-car-line card__icon"></i>
+	    <p class="navselection">Get People</p>
+	  </form>
+
+	  <form class="navbutton"
+		id="get_people"
+		action="{{ url_for('get_people')}}"
+		method="post">
+	    <a class="navoption" onclick="document.forms['get_people'].submit()" class="nav-link">
+	      <div class="icon-background">
+	    <i class="ri-home-line"></i>
+	      </div>
+	    Get People
+	    </a>
+	  </form>
+
+	  <form
+	    class="navbutton"
+	    id="get_courses"
+	    action="{{ url_for('get_courses')}}"
+	    method="post">
+	    <a onclick="document.forms['get_courses'].submit()" class="nav-link">
+	      <div class="icon-background">
+	    <i class="ri-briefcase-line"></i>
+	      </div>
+	    Get Courses
+	    </a>
+	  </form>
+      </header>

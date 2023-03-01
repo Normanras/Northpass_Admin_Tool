@@ -97,16 +97,51 @@ img {
   height: 80px;
 }
 
-main {
+.main {
   margin: 4px;
   flex-wrap: wrap;
+  padding: 25px;
   justify-content: center;
 }
 
 .header {
+  margin: 0;
+  padding: 20px;
   font-weight: 200;
-  margin-top: 80px;
   justify-content: space-between;
+}
+
+.header_opts {
+  margin: 0px;
+  --webkit-box-align: center;
+  align-items: center;
+  display: flex;
+  height: 48px;
+  padding: 8px 16px;
+}
+
+.nav-link {
+  text-decoration: none;
+}
+
+li {
+  display: flex;
+}
+
+.button-background {
+  margin-right: 8px;
+}
+
+.navbutton {
+  border-radius: 4px;
+  margin-right: 4px;
+  border: 1px solid #66C92D;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 16px;
+  text-decoration: none;
+  padding: 8px 16px 8px 12px;
 }
 
 #currentDate {

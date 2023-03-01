@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 {% extends 'head.html' %}
+{% include 'logo.html' %}
 {% block content %}
-
-
 	<h4>Hello! Please find the options for {{ session.school }}.</h4>
  <p></p>
     </div>
@@ -11,7 +10,7 @@
 		    action="{{ url_for('get_people')}}"
 		    method="post">
 		    <a class="a-card"
-		      onclick="document.forms[0].submit()"
+		      onclick="document.forms['get_people'].submit()"
 		      style="cursor:pointer;">
 		    <i class="ri-car-line card__icon"></i>
 		    <p class="card__name">Get People</p>
@@ -61,6 +60,5 @@
 		    <p class="card__name">Add Active People to Groups</p>
 
     </div>
-  </body>
   {% endblock %}
 

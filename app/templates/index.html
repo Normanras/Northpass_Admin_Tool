@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-{% extends 'head.html' %}
+{% include 'head.html' %}
+{% include 'logo.html' %}
 {% block content %}
 	<h4>Hello! Please click below to enter your key.</h4>
 	{% for error in error %}
@@ -12,4 +13,4 @@
     </div>
   </div>
   </body>
-  {% endblock %}
+{% endblock %}
