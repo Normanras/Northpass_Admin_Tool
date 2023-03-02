@@ -1,25 +1,31 @@
-from app import app
-from flask import request, Flask, flash, render_template, session, make_response
 import requests
-import json
 import itertools
 import pandas as pd
-from itables import show
 import re
+import os
+import glob
+from app import app
+from flask import request, render_template, session, make_response
+
+# Upload folder
+UPLOAD_FOLDER = 'static/files'
+app.config['UPLOAD_FOLDER'] =  UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'csv'}
 
 
 def key_response(response):
     if "402" in str(response):
         error = response.text
         return render_template("index.html", title="Error Home", error=error)
-    elif "401" in str(response):
+    if "401" in str(response):
         error = [
-            "Unauthorized access error. This can mean a lot of things, such as the key being changed.",
+            "Unauthorized access error.",
+            "This can mean a lot of things,",
+            "such as the key being changed.",
             "Remember, they are paired to each educator!",
         ]
         return render_template("index.html", title="Error Home", error=error)
-    else:
-        return correct_key(response)
+    return correct_key(response)
 
 
 def correct_key(response):
@@ -29,31 +35,45 @@ def correct_key(response):
     return render_template("options.html", title="Options")
 
 
+
 @app.route("/", methods=["GET", "POST"])
 def ask_key():
+    """This is the main function that asks for the API Key.
+    Without this key, no other functions will work.
+    It also assigns the api key to the session and clears the session upon each reload.
+    """
     session.clear()
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
-        if re.search("\s", session["key"]):
-            error = "Hm. That doesn't seem right"
-            return render_template("index.html", title="Home", error=error)
-        elif session["key"] is not None and len(session["key"]) > 10:
+        #if re.search(r"\s", session["key"]):
+        #    error = "Hm. That doesn't seem right"
+        #    return render_template("index.html", title="Home", error=error)
+        if session["key"] is not None and len(session["key"]) > 10:
             url = "https://api.northpass.com/v2/properties/school"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
             return key_response(response)
-        else:
-            error = "Hm. That doesn't seem right"
-            return render_template("index.html", title="Home", error=error)
+        error = "Hm. That doesn't seem right"
+        return render_template("index.html", title="Home", error=error)
 
-    else:
-        return render_template("index.html", title="Home")
+    return render_template("index.html", title="Home")
 
 
-# @app.route("/", method="POST")
-# def upload_csv():
-#    pass
+@app.route("/csv", methods=["GET", "POST"])
+def parse_csv():
+    csvData = pd.DataFrame()
+    if request.method == 'POST':
+        uploaded_file = request.files['file']
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], uploaded_file.filename)
+        uploaded_file.save(file_path)
+        col_names = ['Learner Full Name', 'Email','Course Name']
+        csvData = pd.read_csv(file_path,names=col_names, header=None)
+        return "SUBMITTED!"
+    for i,row in csvData.iterrows():
+        print(i, row['Email'])
+        return("File uploaded!")
 
+    return render_template("csv.html", title="Upload")
 
 @app.route("/", methods=["GET", "POST"])
 def render_home():
@@ -78,18 +98,16 @@ def download_csv():
 def get_courses():
     array = []
     course_dict = {}
-    df = pd.DataFrame()
-    tempdf = pd.DataFrame()
     pd.set_option("display.max_colwidth", 100)
-    x = 0
+    count = 0
+    dataframe = pd.DataFrame()
 
     if request.method == "POST":
         while True:
-            x += 1
-            url = f"https://api.northpass.com/v2/courses?page={x}"
+            count += 1
+            url = f"https://api.northpass.com/v2/courses?page={count}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
-            jsonresponse = response.json()
             data = response.json()
             nextlink = data["links"]
 
@@ -105,7 +123,7 @@ def get_courses():
                 dataframe["full_description"] = dataframe[
                     "full_description"
                 ].str.replace(r"<[^<>]*>", "", regex=True)
-            print(dataframe)
+                print(dataframe)
 
             if "next" not in nextlink:
                 break
@@ -121,13 +139,13 @@ def get_courses():
 def get_people():
     array = []
     ppl_dict = {}
-    df = pd.DataFrame()
-    x = 0
+    count = 0
+    dataframe = pd.DataFrame()
 
     if request.method == "POST":
         while True:
-            x += 1
-            url = f"https://api.northpass.com/v2/people?page={x}"
+            count += 1
+            url = f"https://api.northpass.com/v2/people?page={count}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
             data = response.json()
@@ -140,7 +158,7 @@ def get_people():
                     ppl_dict[keys] = values
                 array.append(ppl_dict)
                 dataframe = pd.DataFrame(array).drop("custom_avatar_url", axis=1)
-            print(dataframe)
+                print(dataframe)
 
             if "next" not in nextlink:
                 break
@@ -156,12 +174,13 @@ def get_people():
 def add_ppl_opts():
     array = []
     dict_response = {}
-    df = pd.DataFrame()
-    x = 0
+    dataframe = pd.DataFrame()
+    count = 0
+
     if request.method == "POST":
         while True:
-            x += 1
-            url = f"https://api.northpass.com/v2/groups?page={x}"
+            count += 1
+            url = f"https://api.northpass.com/v2/groups?page={count}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
             data = response.json()
@@ -190,13 +209,12 @@ def add_ppl_opts():
 
 @app.route("/bulk_add_ppl", methods=["GET", "POST"])
 def bulk_add_ppl():
-    emailarr = []
-    grouparr = []
     if request.method == "POST":
         emails = request.form.get("emails")
         groups = request.form.get("groups")
-        emails = emails.split(",")
-        groups = groups.split(",")
+        emails.split(",")
+        groups.split(",")
+
         url = "https://api.northpass.com/v2/bulk/people"
         combinations = list(itertools.product(emails, groups))
         print(combinations)
@@ -219,9 +237,9 @@ def bulk_add_ppl():
                 error=error,
             )
         elif "403" in response:
-            error = "Uh oh. Looks like you're not the admin or don't have appropriate privileges. Please talk to your academy admin."
+            error = "Uh oh. Looks like you don't have appropriate privileges."
         elif "422" in response:
-            error = "Hm. Looks like something was wrong with the names. Reach out to the manager of this app."
+            error = "Hm. Looks like something was wrong with the names."
             return render_template(
                 "bulk_add_people.html",
                 table=session["dfgroups"],
@@ -237,12 +255,13 @@ def bulk_add_ppl():
 def add_groups_opts():
     array = []
     dict_response = {}
-    df = pd.DataFrame()
-    x = 0
+    count = 0
+    dataframe = pd.DataFrame()
+
     if request.method == "POST":
         while True:
-            x += 1
-            url = f"https://api.northpass.com/v2/groups?page={x}"
+            count += 1
+            url = f"https://api.northpass.com/v2/groups?page={count}"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url, headers=headers)
             data = response.json()
@@ -272,14 +291,14 @@ def add_groups_opts():
 @app.route("/bulk_add_groups", methods=["GET", "POST"])
 def bulk_add_groups():
     grouparr = []
-    i = 0
+    count = 0
     if request.method == "POST":
         groups = request.form.get("groups")
-        if "\n" in groups:
-            groups = groups.split("\n")
+        if '\n' in groups:
+            groups.split('\n')
             groups = [group.strip() for group in groups]
-        elif "," in groups:
-            groups = groups.split(",")
+        elif ',' in groups:
+            groups.split(",")
             groups = [group.strip() for group in groups]
         for group in groups:
             groupdict = {}
@@ -305,9 +324,12 @@ def bulk_add_groups():
                 error=error,
             )
         elif "403" in response:
-            error = "Uh oh. Looks like you're not the admin or don't have appropriate privileges. Please talk to your academy admin."
+            error = [ "Uh oh. Looks like you're not the",
+                    "admin or don't have appropriate privileges.",
+                    "Please talk to your academy admin." ]
         elif "422" in response:
-            error = "Hm. Looks like something was wrong with the group names. Reach out to the manager of this app."
+            error = ["Hm. Looks like something was wrong with the group names.",
+                     "Reach out to the manager of this app."]
             return render_template(
                 "bulk_add_groups.html",
                 table=session["dfgroups"],

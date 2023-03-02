@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+{% include 'logo.html' %}
+{% extends 'head.html' %}
+{% block content %}
+
+<h3> If you'd like to upload a CSV. Please do so here:<h3>
+  <p></p>
+  <form method="POST" action="" enctype="multipar/form-data">
+   <p><input type="file" name="file"></p>
+   <p><input type="submit" value="Submit CSV"></p>
+  </form>
+
+{% endblock %}
+
