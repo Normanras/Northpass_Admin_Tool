@@ -5,10 +5,12 @@ import re
 import os
 import glob
 from app import app
-from flask import request, render_template, session, make_response
+from flask import redirect, flash, request, render_template, session, make_response
+from werkzeug.utils import secure_filename
 
 # Upload folder
-UPLOAD_FOLDER = 'static/files'
+UPLOAD_FOLDER = '/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files'
+# UPLOAD_FOLDER = 'static/files'
 app.config['UPLOAD_FOLDER'] =  UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'csv'}
 
@@ -58,22 +60,30 @@ def ask_key():
 
     return render_template("index.html", title="Home")
 
+def allowed_file(filename):
+    return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/csv", methods=["GET", "POST"])
 def parse_csv():
     csvData = pd.DataFrame()
     if request.method == 'POST':
-        uploaded_file = request.files['file']
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], uploaded_file.filename)
-        uploaded_file.save(file_path)
-        col_names = ['Learner Full Name', 'Email','Course Name']
-        csvData = pd.read_csv(file_path,names=col_names, header=None)
-        return "SUBMITTED!"
-    for i,row in csvData.iterrows():
-        print(i, row['Email'])
-        return("File uploaded!")
-
+        if 'file' not in request.files:
+            flash('No file found or uploaded')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file found or uploaded')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            csvData = pd.read_csv(file_path, usecols = ['Email'], index_col=False)
+            html_data = csvData.to_html()
+            return render_template("csv.html", table=html_data, title="Uploaded File")
     return render_template("csv.html", title="Upload")
+
 
 @app.route("/", methods=["GET", "POST"])
 def render_home():
