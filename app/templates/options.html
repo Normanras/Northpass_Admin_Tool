@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 {% extends 'head.html' %}
+{% include 'header.html' %}
 {% include 'logo.html' %}
 {% block content %}
-<h4>Hello! Please find the options for {{ session.school }}.</h4>
 
+<h4>Hello! Please find the options for {{ session.school }}.</h4>
+{% include 'csv.html' %}
  <p></p>
     </div>
     <div class="card-grid">
@@ -61,5 +63,4 @@
 		    <p class="card__name">Add Active People to Groups</p>
 
     </div>
-  {% endblock %}
-
+    {% endblock %}

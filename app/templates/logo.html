@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-        <div class="main">
-	  <a href="{{ url_for('render_home')}}">
-	    <img
-	    src="{{ url_for('static', filename="NP-Logo-Primary-FC.png") }}"
-	    alt="Northpass Full Color Logo"
-	    >
-	    </img></a>
-	{% for message in get_flashed_messages() %}
-	<h2> {{ message }} </h2>
-	{% endfor %}
+<div class="logo-div">
+  <a href="{{ url_for('render_home')}}">
+    <img
+    src="{{ url_for('static', filename="NP-Logo-Primary-FC.png") }}"
+    alt="Northpass Full Color Logo"
+    >
+    </img></a>
+{% for message in get_flashed_messages() %}
+<h2> {{ message }} </h2>
+{% endfor %}

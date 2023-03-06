@@ -3,12 +3,14 @@
 {% include 'logo.html' %}
 {% block content %}
 	<h4>Hello! Please click below to enter your key.</h4>
-	{% for error in error %}
+	{% for error in errors %}
  <h2 class=error><strong> {{ error }} </strong></h2>
 	{% endfor %}
+ <p>
+ </p>
 	  <form action="{{ url_for("ask_key")}}" method="post">
-	    <input type="text" name="apikey">
-	    <input type="submit" value="Submit">
+	    <input id="fields" type="text" name="apikey">
+	    <input id="fields" type="submit" value="Submit">
 	 </form>
     </div>
   </div>

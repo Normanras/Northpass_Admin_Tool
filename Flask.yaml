@@ -1,0 +1,20 @@
+session_name: '0'
+windows:
+- focus: 'true'
+  layout: e90b,204x63,0,0[204x46,0,0,0,204x16,0,47{36x16,0,47,2,84x16,37,47,3,82x16,122,47,4}]
+  options: {}
+  panes:
+  - shell_command:
+    - cd /Users/normrasmussen/Documents/Projects/CSM_webapp
+    - nvim
+  - shell_command:
+    - cd /Users/normrasmussen
+    - cmatrix
+  - focus: 'true'
+    shell_command:
+    - cd /Users/normrasmussen/Documents/Projects/CSM_webapp
+    - Python
+  - shell_command:
+    - cd /Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files
+    - zsh
+  window_name: flask main

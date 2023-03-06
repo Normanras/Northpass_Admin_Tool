@@ -1,5 +1,5 @@
 
-/* Custom Variables | Color Scheme */
+/* 1.0 - Foundational Styling */
 
 :root {
   --primary:  #66C92D;
@@ -49,6 +49,8 @@ html {
   justify-content: center;
 }
 
+/* 1.1 - Dataframe and Table Styling */
+
 input,
 select {
   width: 200px;
@@ -79,6 +81,8 @@ select {
   background: #CCD4D8;
 }
 
+/* Titles and Header Copy/Test */
+
 h1 {
   font-size: 4rem;
   font-weight: bold;
@@ -97,12 +101,14 @@ img {
   height: 80px;
 }
 
-.main {
+.logo-div {
   margin: 4px;
   flex-wrap: wrap;
   padding: 25px;
   justify-content: center;
 }
+
+/* 1.? - Header and Navigation Bar Styling */
 
 .header {
   margin: 0;
@@ -175,6 +181,8 @@ ul {
   display: flex;
 }
 
+/* 1.? - Card Layout in options.html only */
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -190,28 +198,6 @@ ul {
   border: 1px solid #66C92D;
   color: #FFFFFF;
 }
-/*
-.card:link,
-.card:visited {
-  color: white;
-  text-decoration: none;
-
-  margin: 1.2rem;
-  padding: 4rem 8rem;
-
-  background-color: var(--background-light);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  overflow: hidden;
-  cursor: pointer;
-  position: relative;
-
-  outline: none;
-  transition: 0.1s;
-}*/
 
 .card:hover,
 .card:focus {
@@ -222,7 +208,7 @@ ul {
   bottom: 0;
 }
 
-.card:hover > .card__name {
+.card:checked > .card__name {
   bottom: 0;
 }
 
@@ -238,4 +224,71 @@ ul {
   position: relative;
   left: 50%;
   transition: 0.1s;
+}
+
+/* Styling for the options2.html file only */
+
+.fields {
+  display: grid;
+  width: 60px; height: 40px; margin: 0;
+  appearance: none; -webkit-appearance: none;
+  cursor: pointer;
+  background: var(--background-dark);
+  border-radius: 20px;
+}
+
+input:not(:nth-of-type(4n+1))::before,
+input:nth-of-type(n+5)::after {
+  content: '';
+  border-radius: 20px;
+  pointer-events: none;
+  grid-area: 1/1;
+}
+
+input:not(:nth-of-type(4n+1))::before { transform: translatex(-85px); }
+
+input:nth-of-type(n+5)::after { transform: translatey(-60px); }
+
+input:checked { background: limegreen; }
+
+/* a checked box's right borders */
+input:not(:nth-of-type(4n)):checked + input:checked::before {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  background: limegreen;
+}
+/* a checked box's bottom borders */
+input:nth-last-of-type(n+5):checked + * + * + * + input:checked::after {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  background: limegreen;
+}
+/* a checked box's adjacent (rightside) checked box's left borders */
+input:not(:nth-of-type(4n)):checked + input:checked + input::before {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background: limegreen;
+}
+/* a checked box's adjacent (below) checked box's top borders */
+input:not(:nth-of-type(4n)):checked + * + * + * +  input:checked + input::before {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  background: limegreen;
+}
+/* a checked box's (in last column) left borders */
+input:nth-of-type(4n-1):checked + input:checked {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+/* a checked box's (in last column) adjacent (below) checked box's top borders */
+input:nth-of-type(4n):checked + * + * + * + input:checked {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.selections {
+  display: grid;
+  grid:  repeat(5, 60px) / repeat(4, 85px);
+  align-items: center; justify-items: center;
+  margin: 0;
 }
