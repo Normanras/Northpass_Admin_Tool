@@ -4,15 +4,44 @@
 {% include 'logo.html' %}
 {% block content %}
 	<h4>Please find your options below. Some things to note:</h4>
-	{% if error %}
+ <div class="instructions-list">
+  <div class="instructions-left">
+ <ul>
+  <li> Left side - Manual entry:
+    <ul>
+     <li> Both fields <em>don't</em> need to be filled out!</li>
+     <li> You can add just people or just groups.</li>
+     <li> Adding both Emails and Groups will add all people to all groups.</li>
+    </ul>
+  </li>
+ </ul>
+  </div>
+
+  <div class="instructions-right">
+   <ul>
+   <li> Right side - CSV Upload:
+   <ul>
+     <li> The CSV will only look for one or both columns with the exact wording as the header row! </li>
+     <li> The Header rows must be <strong>Email</strong> and/or <strong>Groups</strong></li>
+     <li> You can easily add people to multiple groups.</li>
+     <li> To add every person to every group, simply upload the CSV and select option 1 below. </li>
+     <li> For adding people to specific groups, format the csv as | Name | Group 1 | Group 2 | and select option 2 below. </li>
+     <li> There are no limits the number of people or groups that can be added.</li>
+   </ul>
+  </li>
+ </ul>
+  </div>
+ </div>
+{% if error %}
 	<p class=error><strong> </strong>{{ error }}</p>
 	{% endif %}
  <p>&nbsp;</p>
  <div class="man-csv-opts">
   <div class="manual-opts">
-	<p><label for="Bulk Add People"> Please select the appropriate options below.</label></p>
+	<p><label for="Bulk Add People"> Each item must be comma separated or placed on a
+  new line.</label></p>
 	  <form action="{{ url_for("bulk_add")}}" method="post">
-	    <p>Please Copy and Paste Emails of learners you'd like to add</p>
+	    <p>Emails</p>
 	    <textarea id="emails" name="emails" rows="4" cols="50"></textarea>
 	    <p>Please paste in the Group Names which these learners should be added to.</p>
 	    <textarea id="groups" name="groups" rows="4" cols="50"></textarea>

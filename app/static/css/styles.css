@@ -132,12 +132,23 @@ img {
   text-decoration: none;
 }
 
+.instructions-list{
+  display:flex;
+  justify-content: center;
+  width: 100%;
+}
+
 li {
-  display: flex;
+  display: block;
 }
 
 .button-background {
   margin-right: 8px;
+}
+
+.radio-options {
+  display: flex;
+  justify-content: inherit;
 }
 
 .navbutton {
@@ -152,7 +163,8 @@ li {
 }
 
 .man-csv-opts {
-  display: flex
+  display: flex;
+  justify-content: space-evenly;
 
 }
 .csv-upload {
@@ -193,7 +205,8 @@ li {
   }
 }
 ul {
-  display: flex;
+  display: block;
+  text-align: left;
 }
 
 /* 1.? - Card Layout in options.html only */

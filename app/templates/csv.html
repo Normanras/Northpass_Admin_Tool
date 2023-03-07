@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <div class="csv-upload">
-<h3> If you'd like to upload a CSV. Please do so here:<h3>
+<h3> If you'd like to upload a CSV. Please do so here:</h3>
   <p></p>
   <form method="POST"
     action="{{ url_for('csv') }}"
     enctype="multipart/form-data">
    <p><input type="file" name="file"></p>
+    <div class="radio-options">
+      <input type="radio" id="all-groups" name="all-groups" value="all-groups">
+      <label for="all-groups">All Learners in All Groups</label>
+    </div>
+     <div class="radio-options">
+      <input type="radio" id="some-groups" name="some-groups" value="some-groups">
+      <label for="some-groups">Learners Only in Adjacent Groups</label>
+    </div>
    <p><input type="submit" value="Submit CSV"></p>
   </form>
 </div>

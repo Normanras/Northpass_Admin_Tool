@@ -59,23 +59,13 @@ def correct_key(response):
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @app.route("/dev", methods=["GET", "POST"])
 def dev_test():
     return render_template("options.html", title="Dev Test")
 
 
 # DONE: Remove header for main page.
-# TODO: Leave boxes but change outcome depending if file has been uploaded.
-"""
-So create a session['file'] variable with the recently uploaded file name.
-Then, when someone clicks one of the buttons,
-after that if request == "POST",
-create a secondary if statement for if file == session['file'],
-directly upload emails etc else,
-bring to the secondary pages already created and
-allow them to copy and paste.
-"""
+# DONE: Leave boxes but change outcome depending if file has been uploaded.
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -158,83 +148,6 @@ def csv():
 @app.route("/table")
 def table():
     return render_template("table.html", tables=[session["dfhtml"]], titles=["Table"])
-
-
-@app.route("/get_courses", methods=["GET", "POST"])
-def get_courses():
-    array = []
-    course_dict = {}
-    pd.set_option("display.max_colwidth", 100)
-    count = 0
-    dataframe = pd.DataFrame()
-
-    if request.method == "POST":
-        while True:
-            count += 1
-            endpoint = f"v2/courses?page={count}"
-            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
-            response = requests.get(url + endpoint, headers=headers)
-            data = response.json()
-            nextlink = data["links"]
-
-            for response in data["data"]:
-                uuid = response["id"]
-                course_dict = {"id": uuid}
-                for keys, values in response["attributes"].items():
-                    course_dict[keys] = values
-                array.append(course_dict)
-                dataframe = pd.DataFrame(array).drop(
-                    ["list_image_url", "permalink"], axis=1
-                )
-                dataframe["full_description"] = dataframe[
-                    "full_description"
-                ].str.replace(r"<[^<>]*>", "", regex=True)
-                print(dataframe)
-
-            if "next" not in nextlink:
-                break
-
-        dfcourse = dataframe.to_html()
-        session["dfcsv"] = dataframe.to_csv()
-        return render_template("get.html", table=dfcourse, title="List of Courses")
-    else:
-        return "This isn't working. Let's go our own way."
-
-
-@app.route("/get_people", methods=["GET", "POST"])
-def get_people():
-    array = []
-    ppl_dict = {}
-    count = 0
-    dataframe = pd.DataFrame()
-
-    if request.method == "POST":
-        print("get People POST")
-        while True:
-            count += 1
-            endpoint = f"v2/people?page={count}"
-            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
-            response = requests.get(url + endpoint, headers=headers)
-            data = response.json()
-            nextlink = data["links"]
-
-            for response in data["data"]:
-                uuid = response["id"]
-                ppl_dict = {"id": uuid}
-                for keys, values in response["attributes"].items():
-                    ppl_dict[keys] = values
-                array.append(ppl_dict)
-                dataframe = pd.DataFrame(array).drop("custom_avatar_url", axis=1)
-                print(dataframe)
-
-            if "next" not in nextlink:
-                break
-
-        dfppl = dataframe.to_html()
-        session["dfcsv"] = dataframe.to_csv()
-        return render_template("get.html", table=dfppl, title="List of People")
-    else:
-        return render_template("get.html", error="Something went wrong")
 
 
 @app.route("/bulk_add_opts", methods=["GET", "POST"])
@@ -327,12 +240,11 @@ def bulk_add():
     if request.method == "POST":
         emails = request.form.get("emails")
         groups = request.form.get("groups")
-        print(emails)
-        print(type(emails))
         if emails:
             if "\n" in emails:
                 emails = emails.split("\n")
                 emails = [email.strip() for email in emails]
+                emails = [re.sub(r'[,]', "", email) for email in emails]
                 print(emails)
                 print(type(emails))
                 # return api_add_ppl_groups(emails, groups)
@@ -342,23 +254,18 @@ def bulk_add():
                 # return api_add_ppl_groups(emails, groups)
         if groups:
             if "\n" in groups:
-                groups.split("\n")
+                groups = groups.split("\n")
                 groups = [group.strip() for group in groups]
             elif "," in groups:
-                groups.split(",")
+                groups = groups.split(",")
                 groups = [group.strip() for group in groups]
-
-#        print(groups)
-#        print(type(groups))
-#        print(emails)
-#        print(type(emails))
 
     return render_template('bulk_add.html')
 
 
 #    for group in groups:
 #    groupdict = {}
-    groupdict["name"] = group
+#    groupdict["name"] = group
 
 def api_add_ppl(emails):
     pass
@@ -369,46 +276,14 @@ def api_add_groups(groups):
 
 
 def api_add_ppl_groups(emails, groups):
-    if not emails:
-        if not groups:
-            endpoint = "v2/bulk/people"
-            combinations = list(itertools.product(emails, groups))
-            print(combinations)
-            payload = {
-                "data": {
-                    "attributes": {"people": [{"email": emails, "groups": groups}]}
-                }
-            }
-            headers = {
-                "accept": "application/json",
-                "content-type": "application/json",
-                "X-Api-Key": session["key"],
-            }
-            response = requests.post(url + endpoint, json=payload, headers=headers)
-            response = str(response)
-            if "202" in response:
-                error = "Success! People have been added successfully."
-                return render_template(
-                    "bulk_add_ppl.html",
-                    table=session["dfgroups"],
-                    title="People Added",
-                    error=error,
-                )
-            elif "403" in response:
-                error = "Uh oh. Looks like you don't have appropriate privileges."
-            elif "422" in response:
-                error = "Hm. Looks like something was wrong with the names."
-                return render_template(
-                    "bulk_add_people.html",
-                    table=session["dfgroups"],
-                    title="People Added",
-                    error=error,
-                )
-            else:
-                error = "Shrug"
-                return render_template("bulk_add_ppl.html", title="Shrug", errors=error)
         endpoint = "v2/bulk/people"
-        payload = {"data": {"attributes": {"people": [{"email": emails}]}}}
+        combinations = list(itertools.product(emails, groups))
+        print(combinations)
+        payload = {
+            "data": {
+                "attributes": {"people": [{"email": emails, "groups": groups}]}
+            }
+        }
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
@@ -437,6 +312,38 @@ def api_add_ppl_groups(emails, groups):
         else:
             error = "Shrug"
             return render_template("bulk_add_ppl.html", title="Shrug", errors=error)
+
+def api_add_ppl():
+    endpoint = "v2/bulk/people"
+    payload = {"data": {"attributes": {"people": [{"email": emails}]}}}
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-Api-Key": session["key"],
+    }
+    response = requests.post(url + endpoint, json=payload, headers=headers)
+    response = str(response)
+    if "202" in response:
+        error = "Success! People have been added successfully."
+        return render_template(
+            "bulk_add_ppl.html",
+            table=session["dfgroups"],
+            title="People Added",
+            error=error,
+        )
+    elif "403" in response:
+        error = "Uh oh. Looks like you don't have appropriate privileges."
+    elif "422" in response:
+        error = "Hm. Looks like something was wrong with the names."
+        return render_template(
+            "bulk_add_people.html",
+            table=session["dfgroups"],
+            title="People Added",
+            error=error,
+        )
+    else:
+        error = "Shrug"
+        return render_template("bulk_add_ppl.html", title="Shrug", errors=error)
     error = "No Data was Loaded. Try again, bozo."
     return render_template("bulk_add_ppl.html", title="No Data", errors=error)
 
