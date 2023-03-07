@@ -1,39 +1,84 @@
 <!DOCTYPE html>
       <header class="header">
 
-	<ul class="header_opts">
-	  <form class="navbutton"
-	    action="{{ url_for('render_home')}}"
-	    method="post">
+	  <form class="navbutton" >
 	    <a class="navoption"
+	       href="{{ url_for('render_home')}}"
 	      style="cursor:pointer;">
 	    <i class="ri-home-line card__icon"></i>
 	    <p class="navselection">Home</p>
 	    </a>
 	  </form>
 
-	  <form class="navbutton"
-	    action="{{ url_for('get_people')}}"
+	<form class="navbutton"
+	    id="get_people"
+	    action="{{ url_for('bulk_add_ppl_opts')}}"
 	    method="post">
 	    <a class="navoption"
-	      onclick="document.forms['get_people'].submit()"
+	      onclick="document.forms['bulk_add_ppl_opts'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-send-plane-line card__icon"></i>
+	    <p class="navselection">Bulk Courses</p>
+	    </a>
+	  </form>
+
+	  <form class="navbutton"
+	    id="get_people"
+	    action="{{ url_for('bulk_add_groups_opts')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['bulk_add_groups_opts'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-shape-2-line card__icon"></i>
+	    <p class="navselection">Bulk Courses</p>
+	    </a>
+	  </form>
+
+	<form class="navbutton"
+	    id="get_people"
+	    action="{{ url_for('ppl_to_groups_opts')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['ppl_to_groups_opts'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-group-line card__icon"></i>
+	    <p class="navselection">Bulk Courses</p>
+	    </a>
+	  </form>
+
+
+	  <form class="navbutton"
+	    id="get_people"
+	    action="{{ url_for('bulk_courses_to_groups')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['bulk_add_course_groups'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-car-line card__icon"></i>
-	    <p class="navselection">Get People</p>
+	    <p class="navselection">Bulk Courses</p>
 	    </a>
 	  </form>
 
 	  <form
 	    class="navbutton"
 	    id="get_courses"
-	    action="{{ url_for('get_courses')}}"
+	    action="{{ url_for('bulk_invite_ppl')}}"
 	    method="post">
 	    <a class = "navoption"
-	      onclick="document.forms['get_courses'].submit()"
+	      onclick="document.forms['bulk_invite_ppl'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-briefcase-line card__icon"></i>
-	    <p class="navselection">Get Courses</p>
+	    <p class="navselection">Bulk Invite</p>
 	    </a>
 	  </form>
-	</ul>
+
+	  <form class="navbutton">
+	    <a class = "navoption"
+	       href="{{ url_for('clear_session')}}"
+	      style="cursor:pointer;">
+	    <i class="ri-scissors-line card__icon"></i>
+	    <p class="navselection">Clear Session</p>
+	    </a>
+	  </form>
+
       </header>

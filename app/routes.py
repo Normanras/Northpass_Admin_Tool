@@ -72,7 +72,7 @@ def ask_key():
     Without this key, no other functions will work.
     It also assigns the api key to the session and clears the session upon each reload.
     """
-    while session["key"]:
+    if session.get('key'):
         return render_template("options.html", title="Options Home")
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
@@ -89,11 +89,17 @@ def ask_key():
 
     return render_template("index.html", title="Home")
 
-@app.route("/options", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def render_home():
-    if session['key'] is not None:
+    if session.get('key'):
         return render_template("options.html", title="Home")
     return render_template("index.html", title="Enter Key")
+
+@app.route("/options", methods=["GET", "POST"])
+def clear_session():
+    session.clear()
+    return render_template("index.html", title="Home, New session")
+
 
 
 @app.route("/csv", methods=["GET", "POST"])
@@ -111,7 +117,7 @@ def parse_csv():
             filename = secure_filename(file.filename)
             session['file'] = filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file_path = session['filepath']
+            session['filepath'] = file_path
             file.save(file_path)
             csvData = pd.read_csv(file_path, usecols = ['Email'], index_col=False)
             html_data = csvData.to_html()
@@ -200,46 +206,48 @@ def get_people():
     else:
         return render_template("get.html", error="Something went wrong")
 
-@app.route("/options", methods=["GET", "POST"])
-def add_ppl_opts():
+@app.route("/bulk_add_ppl_opts", methods=["GET", "POST"])
+def bulk_add_ppl_opts():
     array = []
     dict_response = {}
     dataframe = pd.DataFrame()
     count = 0
 
     if request.method == "POST":
-        #if session['file']:
-        #    print("file exists! uploading data...")
-        while True:
-            count += 1
-            endpoint = f"v2/groups?page={count}"
-            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
-            response = requests.get(url+endpoint, headers=headers)
-            data = response.json()
-            nextlink = data["links"]
+        if session.get('file'):
+            print("file exists! uploading data...")
+            return "File Exists! Test Complete"
+        else:
+            while True:
+                count += 1
+                endpoint = f"v2/groups?page={count}"
+                headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+                response = requests.get(url+endpoint, headers=headers)
+                data = response.json()
+                nextlink = data["links"]
 
-            for response in data["data"]:
-                uuid = response["id"]
-                dict_response = {"id": uuid}
-                for keys, values in response["attributes"].items():
-                    dict_response[keys] = values
-                array.append(dict_response)
-                dataframe = pd.DataFrame(array).drop("group_enrollment_link", axis=1)
-            print(dataframe)
+                for response in data["data"]:
+                    uuid = response["id"]
+                    dict_response = {"id": uuid}
+                    for keys, values in response["attributes"].items():
+                        dict_response[keys] = values
+                    array.append(dict_response)
+                    dataframe = pd.DataFrame(array).drop("group_enrollment_link", axis=1)
+                print(dataframe)
 
-            if "next" not in nextlink:
-                break
+                if "next" not in nextlink:
+                    break
 
-        dfgroups = dataframe.to_html()
-        session["dfcsv"] = dataframe.to_csv()
-        return render_template(
-            "bulk_add_ppl.html", table=dfgroups, titles="Bulk Add Learners"
-        )
+            dfgroups = dataframe.to_html()
+            session["dfcsv"] = dataframe.to_csv()
+            return render_template(
+                "bulk_add_ppl.html", table=dfgroups, titles="Bulk Add Learners"
+            )
     else:
         return "This isn't working. Let's go our own way."
 
-@app.route("/options", methods=["GET", "POST"])
-def add_groups_opts():
+@app.route("/bulk_add_groups_opts", methods=["GET", "POST"])
+def bulk_add_groups_opts():
     array = []
     dict_response = {}
     count = 0
@@ -393,6 +401,18 @@ def ppl_to_groups():
         "X-Api-Key": session["key"],
     }
 
+@app.route("/bulk_courses_to_groups", methods=["GET", "POST"])
+def bulk_courses_to_groups():
+    pass
+
+
+@app.route("/bulk_invite_ppl", methods=["GET", "POST"])
+def bulk_invite_ppl():
+    pass
+
+#@app.teardown_request
+#def clear_session():
+#    session.clear()
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 

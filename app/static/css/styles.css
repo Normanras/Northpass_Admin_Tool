@@ -124,6 +124,8 @@ img {
   display: flex;
   height: 48px;
   padding: 8px 16px;
+  text-decoration: none;
+
 }
 
 .nav-link {
@@ -146,8 +148,12 @@ li {
   cursor: pointer;
   font-size: 14px;
   line-height: 16px;
-  text-decoration: none;
   padding: 8px 16px 8px 12px;
+}
+
+.navoption {
+  color: var(--background);
+  text-decoration: none;
 }
 
 #currentDate {
@@ -159,13 +165,14 @@ li {
   font-weight: 600;
 }
 
+.header {
+  display: flex;
+  justify-content: space-evenly;
+}
+
 @media screen and (max-width: 1250px) {
   h1 {
     display: flex;
-  }
-
-  .header {
-    flex-direction: column-reverse;
   }
 
   #currentTime {
