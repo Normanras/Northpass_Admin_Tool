@@ -2,68 +2,15 @@
 {% extends 'head.html' %}
 {% include 'logo.html' %}
 {% include 'header.html' %}
+
 {% block content %}
-
-<h4>Hello! Please find the options for {{ session.school }}.</h4>
+<h2>Hello! You're currently accessing {{ session.school }}.</h2>
+<h3>You have two options here. You can click one of the options above and upload
+ people/courses/groups manually. Or, you can upload a CSV, and then select one
+ of the options and perform the action with the data in the CSV. Note that you
+ may need specific IDs for certain tasks.
 <p></p>
+
 {% include 'csv.html' %}
- <p></p>
-    </div>
-    <div class="card-grid">
 
-		    <form class="card"
-      id="get_people"
-		    action="{{ url_for('get_people')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['get_people'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-car-line card__icon"></i>
-		    <p class="card__name">Get People</p>
-		    </a></form>
-
-		    <form class="card"
-		    id="get_courses"
-		    action="{{ url_for('get_courses')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['get_courses'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-plane-line card__icon"></i>
-		    <p class="card__name">Get Courses</p>
-		    </a></form>
-
-      <form class="card"
-		    id="bulk_add_ppl_opts"
-		    action="{{ url_for('bulk_add_ppl_opts')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['bulk_add_ppl_opts'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-send-plane-line card__icon"></i>
-		    <p class="card__name">Bulk Add People</p>
-		    </a></form>
-
-      <form class="card"
-		    id="add_groups_opts"
-		    action="{{ url_for('bulk_add_groups_opts')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['bulk_add_groups_opts'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-shape-2-line card__icon"></i>
-		    <p class="card__name">Bulk Add Groups</p>
-      </a></form>
-
-      <form class="card"
-		    id="ppl_to_groups_opts"
-		    action="{{ url_for('ppl_to_groups_opts')}}"
-		    method="post">
-		    <a class="a-card"
-		      onclick="document.forms['ppl_to_groups_opts'].submit()"
-		      style="cursor:pointer;">
-		    <i class="ri-group-line card__icon"></i>
-		    <p class="card__name">Add Active People to Groups</p>
-
-    </div>
-    {% endblock %}
+{% endblock %}

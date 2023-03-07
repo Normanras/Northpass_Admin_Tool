@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+<div class="csv-upload">
 <h3> If you'd like to upload a CSV. Please do so here:<h3>
   <p></p>
-  <form method="post" action="" enctype="multipart/form-data">
+  <form method="POST"
+    action="{{ url_for('csv') }}"
+    enctype="multipart/form-data">
    <p><input type="file" name="file"></p>
    <p><input type="submit" value="Submit CSV"></p>
   </form>
+</div>
 
-{% if table %}
-  {% include 'table.html' %}
-{% else %}
-<p></p>
-{% endif %}

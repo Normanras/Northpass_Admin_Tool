@@ -11,64 +11,38 @@
 	  </form>
 
 	<form class="navbutton"
-	    id="get_people"
-	    action="{{ url_for('bulk_add_ppl_opts')}}"
+	    id="bulk_add_opts"
+	    action="{{ url_for('bulk_add_opts')}}"
 	    method="post">
 	    <a class="navoption"
-	      onclick="document.forms['bulk_add_ppl_opts'].submit()"
+	      onclick="document.forms['bulk_add_opts'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-send-plane-line card__icon"></i>
-	    <p class="navselection">Bulk Courses</p>
+	    <p class="navselection">Bulk Add</p>
 	    </a>
 	  </form>
 
 	  <form class="navbutton"
-	    id="get_people"
-	    action="{{ url_for('bulk_add_groups_opts')}}"
-	    method="post">
-	    <a class="navoption"
-	      onclick="document.forms['bulk_add_groups_opts'].submit()"
-	      style="cursor:pointer;">
-	    <i class="ri-shape-2-line card__icon"></i>
-	    <p class="navselection">Bulk Courses</p>
-	    </a>
-	  </form>
-
-	<form class="navbutton"
-	    id="get_people"
-	    action="{{ url_for('ppl_to_groups_opts')}}"
-	    method="post">
-	    <a class="navoption"
-	      onclick="document.forms['ppl_to_groups_opts'].submit()"
-	      style="cursor:pointer;">
-	    <i class="ri-group-line card__icon"></i>
-	    <p class="navselection">Bulk Courses</p>
-	    </a>
-	  </form>
-
-
-	  <form class="navbutton"
-	    id="get_people"
+	    id="bulk_courses_to_groups"
 	    action="{{ url_for('bulk_courses_to_groups')}}"
 	    method="post">
 	    <a class="navoption"
 	      onclick="document.forms['bulk_add_course_groups'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-car-line card__icon"></i>
-	    <p class="navselection">Bulk Courses</p>
+	    <p class="navselection">Add Courses</p>
 	    </a>
 	  </form>
 
-	  <form
-	    class="navbutton"
-	    id="get_courses"
-	    action="{{ url_for('bulk_invite_ppl')}}"
+	  <form class="navbutton"
+	    id="templates"
+	    action="{{ url_for('templates')}}"
 	    method="post">
-	    <a class = "navoption"
-	      onclick="document.forms['bulk_invite_ppl'].submit()"
+	    <a class="navoption"
+	      onclick="document.forms['templates'].submit()"
 	      style="cursor:pointer;">
-	    <i class="ri-briefcase-line card__icon"></i>
-	    <p class="navselection">Bulk Invite</p>
+	    <i class="ri-car-line card__icon"></i>
+	    <p class="navselection">Templates</p>
 	    </a>
 	  </form>
 
@@ -77,7 +51,7 @@
 	       href="{{ url_for('clear_session')}}"
 	      style="cursor:pointer;">
 	    <i class="ri-scissors-line card__icon"></i>
-	    <p class="navselection">Clear Session</p>
+	    <p class="navselection">New Customer</p>
 	    </a>
 	  </form>
 

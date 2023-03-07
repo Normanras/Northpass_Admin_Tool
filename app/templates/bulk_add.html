@@ -3,19 +3,25 @@
 {% include 'header.html' %}
 {% include 'logo.html' %}
 {% block content %}
-	<h4>Hello! Please enter the emails below.</h4>
+	<h4>Please find your options below. Some things to note:</h4>
 	{% if error %}
 	<p class=error><strong> </strong>{{ error }}</p>
 	{% endif %}
-
+ <p>&nbsp;</p>
+ <div class="man-csv-opts">
+  <div class="manual-opts">
 	<p><label for="Bulk Add People"> Please select the appropriate options below.</label></p>
-	  <form action="{{ url_for("bulk_add_ppl")}}" method="post">
+	  <form action="{{ url_for("bulk_add")}}" method="post">
 	    <p>Please Copy and Paste Emails of learners you'd like to add</p>
 	    <textarea id="emails" name="emails" rows="4" cols="50"></textarea>
-	    <p>Please paste in the Group UUIDs which these learners should be added to.</p>
+	    <p>Please paste in the Group Names which these learners should be added to.</p>
 	    <textarea id="groups" name="groups" rows="4" cols="50"></textarea>
 	    <p></p>
 	      <input type="submit" value="Submit"></input>
 	   </form>
+  </div>
+    {% include 'csv.html' %}
+  </div>
+ </div>
  {% include 'table.html' %}
 {% endblock %}
