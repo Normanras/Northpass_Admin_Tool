@@ -5,12 +5,5 @@
 
 {% block content %}
 <h2>Hello! You're currently accessing {{ session.school }}.</h2>
-<h3>You have two options here. You can click one of the options above and upload
- people/courses/groups manually. Or, you can upload a CSV, and then select one
- of the options and perform the action with the data in the CSV. Note that you
- may need specific IDs for certain tasks.
-<p></p>
-
-{% include 'csv.html' %}
 
 {% endblock %}

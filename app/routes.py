@@ -230,11 +230,6 @@ def bulk_add_groups_opts():
         return "This isn't working. Let's go our own way."
 
 
-@app.route("/options", methods=["GET", "POST"])
-def ppl_to_groups_opts():
-    pass
-
-
 @app.route("/bulk_add", methods=["GET", "POST"])
 def bulk_add():
     if request.method == "POST":
@@ -245,20 +240,32 @@ def bulk_add():
                 emails = emails.split("\n")
                 emails = [email.strip() for email in emails]
                 emails = [re.sub(r'[,]', "", email) for email in emails]
-                print(emails)
-                print(type(emails))
-                # return api_add_ppl_groups(emails, groups)
             elif "," in emails:
                 emails = emails.split(",")
                 emails = [email.strip() for email in emails]
-                # return api_add_ppl_groups(emails, groups)
+            else:
+                emails = []
+                emails.append(emails)
         if groups:
             if "\n" in groups:
                 groups = groups.split("\n")
                 groups = [group.strip() for group in groups]
+                groups = [re.sub(r'[,]', "", group) for group in groups]
             elif "," in groups:
                 groups = groups.split(",")
                 groups = [group.strip() for group in groups]
+            else:
+                groups = []
+                groups.append(groups)
+
+        if emails and groups:
+            print(emails)
+            print(groups)
+            return api_add_ppl_groups(emails, groups)
+        elif emails:
+            return api_add_ppl(emails)
+        elif groups:
+            return api_add_groups(groups)
 
     return render_template('bulk_add.html')
 
@@ -267,16 +274,44 @@ def bulk_add():
 #    groupdict = {}
 #    groupdict["name"] = group
 
+
 def api_add_ppl(emails):
-    pass
+    print(emails)
+    endpoint = "v2/bulk/people"
+    payload = {
+        "data": {
+            "attributes": {"people": [{"email": emails}]}
+        }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-Api-Key": session["key"],
+    }
+    response = requests.post(url + endpoint, json=payload, headers=headers)
+    return check_response(response)
 
 
 def api_add_groups(groups):
-    pass
+    print(groups)
+    endpoint = "v2/bulk/people"
+    payload = {
+        "data": {
+            "attributes": {"people": [{"groups": groups}]}
+        }
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-Api-Key": session["key"],
+    }
+    response = requests.post(url + endpoint, json=payload, headers=headers)
+    return check_response(response)
 
 
 def api_add_ppl_groups(emails, groups):
         endpoint = "v2/bulk/people"
+        print(len(groups))
         combinations = list(itertools.product(emails, groups))
         print(combinations)
         payload = {
@@ -284,75 +319,35 @@ def api_add_ppl_groups(emails, groups):
                 "attributes": {"people": [{"email": emails, "groups": groups}]}
             }
         }
+        print(payload)
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
             "X-Api-Key": session["key"],
         }
         response = requests.post(url + endpoint, json=payload, headers=headers)
-        response = str(response)
-        if "202" in response:
-            error = "Success! People have been added successfully."
-            return render_template(
-                "bulk_add_ppl.html",
-                table=session["dfgroups"],
-                title="People Added",
-                error=error,
-            )
-        elif "403" in response:
-            error = "Uh oh. Looks like you don't have appropriate privileges."
-        elif "422" in response:
-            error = "Hm. Looks like something was wrong with the names."
-            return render_template(
-                "bulk_add_people.html",
-                table=session["dfgroups"],
-                title="People Added",
-                error=error,
-            )
-        else:
-            error = "Shrug"
-            return render_template("bulk_add_ppl.html", title="Shrug", errors=error)
+        return check_response(response)
 
-def api_add_ppl():
-    endpoint = "v2/bulk/people"
-    payload = {"data": {"attributes": {"people": [{"email": emails}]}}}
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-Api-Key": session["key"],
-    }
-    response = requests.post(url + endpoint, json=payload, headers=headers)
+def check_response(response):
     response = str(response)
     if "202" in response:
         error = "Success! People have been added successfully."
-        return render_template(
-            "bulk_add_ppl.html",
-            table=session["dfgroups"],
-            title="People Added",
-            error=error,
-        )
+        return render_template("bulk_add.html", title="People Added", error=error)
     elif "403" in response:
         error = "Uh oh. Looks like you don't have appropriate privileges."
+        return render_template("bulk_add.html", error=error)
     elif "422" in response:
-        error = "Hm. Looks like something was wrong with the names."
-        return render_template(
-            "bulk_add_people.html",
-            table=session["dfgroups"],
-            title="People Added",
-            error=error,
-        )
+        error = "Hm. Looks like something was wrong with the data you added."
+        return render_template("bulk_add.html", error=error)
     else:
         error = "Shrug"
-        return render_template("bulk_add_ppl.html", title="Shrug", errors=error)
-    error = "No Data was Loaded. Try again, bozo."
-    return render_template("bulk_add_ppl.html", title="No Data", errors=error)
-
+        return render_template("bulk_add.html", title="Shrug", errors=error)
 
 @app.route("/templates", methods=["GET", "POST"])
 def templates():
     pass
 
-
+'''
 @app.route("/bulk_add_groups", methods=["GET", "POST"])
 def bulk_add_groups():
     grouparr = []
@@ -408,7 +403,7 @@ def bulk_add_groups():
         else:
             error = "Shrug"
             return render_template("bulk_add_groups.html", title="Shrug", errors=error)
-
+'''
 
 @app.route("/bulk_courses_to_groups", methods=["GET", "POST"])
 def bulk_courses_to_groups():
