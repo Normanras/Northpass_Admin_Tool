@@ -38,7 +38,7 @@
  <p>&nbsp;</p>
  <div class="man-csv-opts">
   <div class="manual-opts">
-	<p><label for="Bulk Add People"> Each item must be comma separated or placed on a
+	<p><label for="Bulk Add"> Each item must be comma separated or placed on a
   new line.</label></p>
 	  <form action="{{ url_for("bulk_add")}}" method="post">
 	    <p>Emails</p>
@@ -52,5 +52,7 @@
     {% include 'csv.html' %}
   </div>
  </div>
- {% include 'table.html' %}
+ {% if table %}
+  {% include 'table.html' %}
+ {% endif %}
 {% endblock %}
