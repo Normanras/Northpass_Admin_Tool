@@ -3,15 +3,16 @@
 {% include 'header.html' %}
 {% include 'logo.html' %}
 {% block content %}
-	<h4>Please find your options below. Some things to note:</h4>
+<h2>You're currently accessing {{ session.school }}.</h2>
+	<h2>Instructions</h2>
  <div class="instructions-list">
   <div class="instructions-left">
  <ul>
-  <li> Left side - Manual entry:
+  <li> <h3>Left side - Manual entry:</h3>
     <ul>
-     <li> Both fields <em>don't</em> need to be filled out!</li>
+     <li> Both fields don't need to be filled out!</li>
      <li> You can add just people or just groups.</li>
-     <li> Adding both Emails and Groups will add all people to all groups.</li>
+     <li> Using both fields will add all people to all groups.</li>
     </ul>
   </li>
  </ul>
@@ -19,19 +20,19 @@
 
   <div class="instructions-right">
    <ul>
-   <li> Right side - CSV Upload:
+    <li> <h3>Right side - CSV Upload:</h3>
    <ul>
-     <li> The CSV will only look for one or both columns with the exact wording as the header row! </li>
      <li> The Header rows must be <strong>Email</strong> and/or <strong>Groups</strong></li>
-     <li> You can easily add people to multiple groups.</li>
-     <li> To add every person to every group, simply upload the CSV and select option 1 below. </li>
-     <li> For adding people to specific groups, format the csv as | Name | Group 1 | Group 2 | and select option 2 below. </li>
-     <li> There are no limits the number of people or groups that can be added.</li>
+     <li> Please format the csv like this:</li>
+     <li> Email,Groups</li>
+     <li> email@email.com, group1, group2, group3 </li>
+      <li> email2@email.com, group5, group1 </li>
    </ul>
   </li>
  </ul>
   </div>
  </div>
+ <p>&nbsp;</p>
 {% if error %}
 	<p class=error><strong> </strong>{{ error }}</p>
 	{% endif %}
@@ -43,7 +44,7 @@
 	  <form action="{{ url_for("bulk_add")}}" method="post">
 	    <p>Emails</p>
 	    <textarea id="emails" name="emails" rows="4" cols="50"></textarea>
-	    <p>Please paste in the Group Names which these learners should be added to.</p>
+	    <p>Group Names</p>
 	    <textarea id="groups" name="groups" rows="4" cols="50"></textarea>
 	    <p></p>
 	      <input type="submit" value="Submit"></input>

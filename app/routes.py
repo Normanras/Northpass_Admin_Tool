@@ -37,7 +37,7 @@ def download_csv():
 def key_response(response):
     if "402" in str(response):
         error = response.text
-        return render_template("index.html", title="Error Home", errors=error)
+        return render_template("index.html", title="Error Home", error=error)
     if "401" in str(response):
         error = [
             "Unauthorized access error.",
@@ -45,24 +45,18 @@ def key_response(response):
             "such as the key being changed.",
             "Remember, they are paired to each educator!",
         ]
-        return render_template("index.html", title="Error Home", errors=error)
+        return render_template("index.html", title="Error Home", error=error)
     return correct_key(response)
 
 
 def correct_key(response):
     data = response.json()
     session["school"] = data["data"]["attributes"]["properties"]["name"]
-    print(session["school"])
-    return render_template("options.html", title="Options")
+    return render_template("bulk_add.html", title="Active Session")
 
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route("/dev", methods=["GET", "POST"])
-def dev_test():
-    return render_template("options.html", title="Dev Test")
 
 
 # DONE: Remove header for main page.
@@ -75,35 +69,45 @@ def ask_key():
     Without this key, no other functions will work.
     It also assigns the api key to the session and clears the session upon each reload.
     """
-    if session.get("key"):
-        return render_template("options.html", title="Options Home")
+    specials = '"!@#$%^&*()-+?_=,<>/"'
+    #if session.get("key"):
+    #    return render_template("bulk_add.html", title="Options Home")
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
-        # if re.search(r"\s", session["key"]):
-        #    error = "Hm. That doesn't seem right"
-        #    return render_template("index.html", title="Home", errors=error)
+        if (any(char in specials for char in session["key"]) or
+                re.search(r"[\s]", session["key"])):
+            error = "Invalid Key."
+            session.clear()
+            return render_template("index.html", title="Home", error=error)
         if session["key"] is not None and len(session["key"]) > 10:
             endpoint = "/v2/properties/school"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url + endpoint, headers=headers)
             return key_response(response)
         error = "Hm. That doesn't seem right"
+        session.clear()
         return render_template("index.html", title="Home", error=error)
-
+    session.clear()
     return render_template("index.html", title="Home")
 
 
 @app.route("/", methods=["GET", "POST"])
 def render_home():
     if session.get("key"):
-        return render_template("options.html", title="Home")
+        return render_template("bulk_add.html", title="Home")
     return render_template("index.html", title="Enter Key")
 
 
-@app.route("/options", methods=["GET", "POST"])
-@app.route("/", methods=["GET", "POST"])
+#@app.route("/options", methods=["GET", "POST"])
+#@app.route("/bulk_add", methods=["GET", "POST"])
+@app.route("/clear_session", methods=["GET", "POST"])
 def clear_session():
-    session.clear()
+    if session.get("key"):
+        print("Session Formula")
+        # [session.pop(key) for key in list(session.keys())]
+        session.clear()
+        error="Session Cleared!"
+        return render_template("index.html", error=error, title="Home, New session")
     return render_template("index.html", title="Home, New session")
 
 
@@ -111,19 +115,9 @@ def clear_session():
 def table():
     return render_template("table.html", tables=[session["dfhtml"]], titles=["Table"])
 
-"""
-uploaded_file = request.files['file']
-if  uploaded_file.filename != '':
-print("File has name")
-uploaded_file.save(uploaded_file.filename)
-return render_template("options.html", title="Home, Now with CSV!")
-"""
-
 @app.route("/upload_file", methods=["GET", "POST"])
-@app.route("/bulk_add", methods=["GET", "POST"])
 def upload_file():
     print("Uploading CSV")
-    csvData = pd.DataFrame()
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file found or uploaded")
@@ -136,51 +130,51 @@ def upload_file():
         # return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            session["file"] = filename
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            session["file"] = filename
             session["filepath"] = file_path
             file.save(file_path)
-            # csvData = pd.read_csv(file_path)
             file = list(csv.reader(open(file_path, "r")))
-            emails = []
-            groups = []
-            for col in file:
-                emails.append(col[0])
-                #groups.append(col(range(1,20)))
-                print(emails)
-                #print(groups)
+            return divide_values(file)
+    return render_template("bulk_add.html", title="Bulk Add")
 
-                    #print(emails)
-            # for item in data:
-             #    print(item[0])
-            # lines = reader(csvData)
-            # csvData = list(lines)
-            # print(csvData)
-            selection = request.form.get('learner-groups')
-            if selection == "all-groups":
-                if request.form['preview']:
-                    return api_csv_all_groups(csvData)
-                elif request.form['submit']:
-                    return "Submitted Selection"
-            elif selection == "some-groups":
-                return api_csv_some_groups(csvData)
-            return render_template(
-                "bulk_add.html", table=html_data, title="Uploaded File"
-            )
-    return render_template("options.html", title="Home, now with a CSV Table!")
+def divide_values(file):
+    emails = []
+    groups = []
+    selection = request.form.get('learner-groups')
+    if request.form['submit']:
+        if selection == "all-groups":
+            for item in file[1:]:
+                emails.append(item[0])
+                groups.append(item[1:])
+                # FEAT: These two extract the groups and emails into two lists
+            groups = [item for group in groups for item in group]
+            groups = list(set(groups))
+            print(emails)
+            print(groups)
+            return api_csv_parse(emails, groups)
+            # We're good here. This can now be sent to the api functions with emails and groups.
+        elif selection == "some-groups":
+            submissions = []
+            for item in file[1:]:
+                # FEAT: This extracts each row as a list. Perfect for Learners in Specific Groups.
+                submissions.append(item)
+            for item in submissions:
+                emails.append(item[0])
+                print(type(emails))
+                groups = item[1:]
+                return api_csv_parse(emails, groups)
+            return emails
 
+    if request.form['preview']:
+        error="Preview Button Still Under Construction. Try again later."
+        return render_template("bulk_add.html", error=error, title="Preview Not Yet")
 
-def api_csv_all_groups(csvData):
-    # htmlcsv = csvData.to_html()
- #    for items in csvData:
+    return render_template(
+        "bulk_add.html", title="Uploaded File"
+    )
 
-
-    # emails = csvData['Email'].values.tolist()
-    # emails = [nan for nan in emails if str(nan) != 'nan']
-
-    # groups = csvData['Groups'].values.tolist()
-    # groups = [nan for nan in groups if str(nan) != 'nan']
-
+def api_csv_parse(emails, groups):
     if emails and groups:
         return api_add_ppl_groups(emails, groups)
     elif emails:
@@ -189,7 +183,16 @@ def api_csv_all_groups(csvData):
         return api_add_groups(groups)
     return render_template("bulk_add.html", table=htmlcsv, title="CSV Submission")
 
-def api_csv_some_groups(csvData):
+def api_csv_all_groups(emails, groups):
+    if emails and groups:
+        return api_add_ppl_groups(emails, groups)
+    elif emails:
+        return api_add_ppl(emails)
+    elif groups:
+        return api_add_groups(groups)
+    return render_template("bulk_add.html", table=htmlcsv, title="CSV Submission")
+
+def api_csv_some_groups(emails, groups):
     htmlcsv = csvData.to_html()
 
     emails = csvData['Email'].values.tolist()
