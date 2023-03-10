@@ -138,6 +138,12 @@ img {
   width: 100%;
 }
 
+.instructions-left
+.instructions-right {
+  display: flex;
+  align-items: center;
+}
+
 li {
   display: block;
 }
@@ -206,7 +212,7 @@ li {
 }
 ul {
   display: block;
-  text-align: left;
+  text-align: center;
 }
 
 /* 1.? - Card Layout in options.html only */

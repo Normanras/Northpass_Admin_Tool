@@ -1,9 +1,9 @@
 import requests
 import itertools
-import pandas as pd
 import re
 import os
 import csv
+from functools import wraps
 from app import app
 from flask import (
     redirect,
@@ -39,12 +39,7 @@ def key_response(response):
         error = response.text
         return render_template("index.html", title="Error Home", error=error)
     if "401" in str(response):
-        error = [
-            "Unauthorized access error.",
-            "This can mean a lot of things,",
-            "such as the key being changed.",
-            "Remember, they are paired to each educator!",
-        ]
+        error = "Unauthorized access error.(401)"
         return render_template("index.html", title="Error Home", error=error)
     return correct_key(response)
 
@@ -52,16 +47,20 @@ def key_response(response):
 def correct_key(response):
     data = response.json()
     session["school"] = data["data"]["attributes"]["properties"]["name"]
-    return render_template("bulk_add.html", title="Active Session")
+    return render_template("home.html", title="Active Session")
 
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# DONE: Remove header for main page.
-# DONE: Leave boxes but change outcome depending if file has been uploaded.
-
+def key_required(check):
+    @wraps(check)
+    def decorated_function(*args, **kwargs):
+        if session.get('key') is None:
+            return redirect('/',code=302)
+        return check(*args, **kwargs)
+    return decorated_function
 
 @app.route("/", methods=["GET", "POST"])
 def ask_key():
@@ -70,8 +69,6 @@ def ask_key():
     It also assigns the api key to the session and clears the session upon each reload.
     """
     specials = '"!@#$%^&*()-+?_=,<>/"'
-    #if session.get("key"):
-    #    return render_template("bulk_add.html", title="Options Home")
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
         if (any(char in specials for char in session["key"]) or
@@ -91,20 +88,17 @@ def ask_key():
     return render_template("index.html", title="Home")
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/render_home", methods=["GET", "POST"])
+@key_required
 def render_home():
     if session.get("key"):
-        return render_template("bulk_add.html", title="Home")
-    return render_template("index.html", title="Enter Key")
+        return render_template("home.html", title="Home")
+    return render_template("home.html", title="Enter Key")
 
 
-#@app.route("/options", methods=["GET", "POST"])
-#@app.route("/bulk_add", methods=["GET", "POST"])
 @app.route("/clear_session", methods=["GET", "POST"])
 def clear_session():
     if session.get("key"):
-        print("Session Formula")
-        # [session.pop(key) for key in list(session.keys())]
         session.clear()
         error="Session Cleared!"
         return render_template("index.html", error=error, title="Home, New session")
@@ -113,9 +107,10 @@ def clear_session():
 
 @app.route("/table")
 def table():
-    return render_template("table.html", tables=[session["dfhtml"]], titles=["Table"])
+    return render_template("table.html", tables=[session["table"]], titles=["Table"])
 
 @app.route("/upload_file", methods=["GET", "POST"])
+@key_required
 def upload_file():
     print("Uploading CSV")
     if request.method == "POST":
@@ -126,7 +121,7 @@ def upload_file():
         if file.filename == "":
             print("no file exists")
             flash("No file found or uploaded")
-            return redirect(url_for("bulk_add_opts"))
+            return redirect(url_for("home"))
         # return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -136,7 +131,7 @@ def upload_file():
             file.save(file_path)
             file = list(csv.reader(open(file_path, "r")))
             return divide_values(file)
-    return render_template("bulk_add.html", title="Bulk Add")
+    return render_template("home.html", title="Bulk Add")
 
 def divide_values(file):
     emails = []
@@ -150,10 +145,9 @@ def divide_values(file):
                 # FEAT: These two extract the groups and emails into two lists
             groups = [item for group in groups for item in group]
             groups = list(set(groups))
-            print(emails)
-            print(groups)
             return api_csv_parse(emails, groups)
-            # We're good here. This can now be sent to the api functions with emails and groups.
+            # We're good here. This can now be sent to the api
+            # functions with emails and groups.
         elif selection == "some-groups":
             submissions = []
             for item in file[1:]:
@@ -183,78 +177,13 @@ def api_csv_parse(emails, groups):
         return api_add_groups(groups)
     return render_template("bulk_add.html", table=htmlcsv, title="CSV Submission")
 
-def api_csv_all_groups(emails, groups):
-    if emails and groups:
-        return api_add_ppl_groups(emails, groups)
-    elif emails:
-        return api_add_ppl(emails)
-    elif groups:
-        return api_add_groups(groups)
-    return render_template("bulk_add.html", table=htmlcsv, title="CSV Submission")
-
-def api_csv_some_groups(emails, groups):
-    htmlcsv = csvData.to_html()
-
-    emails = csvData['Email'].values.tolist()
-    emails = [nan for nan in emails if str(nan) != 'nan']
-
-    groups = csvData['Groups'].values.tolist()
-    groups = [nan for nan in groups if str(nan) != 'nan']
-
-    print(emails)
-    print(groups)
-
-    #    print(email)
-    #    return groups
-    # row_list = csvData.loc[2, :].values.flatten().tolist()
-
-    return htmlcsv
-
 @app.route("/bulk_add_opts", methods=["GET", "POST"])
+@key_required
 def bulk_add_opts():
     return render_template("bulk_add.html", titles="Bulk Add Options")
 
-    '''
-    array = []
-    dict_response = {}
-    dataframe = pd.DataFrame()
-    count = 0
-
-    if request.method == "POST":
-        if session.get("file"):
-            pass
-            #print("file exists! uploading data...")
-            #return "File Exists! Test Complete"
-        while True:
-            count += 1
-            endpoint = f"v2/groups?page={count}"
-            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
-            response = requests.get(url + endpoint, headers=headers)
-            data = response.json()
-            nextlink = data["links"]
-
-            for response in data["data"]:
-                uuid = response["id"]
-                dict_response = {"id": uuid}
-                for keys, values in response["attributes"].items():
-                    dict_response[keys] = values
-                array.append(dict_response)
-                dataframe = pd.DataFrame(array).drop(
-                    "group_enrollment_link", axis=1
-                )
-            print(dataframe)
-
-            if "next" not in nextlink:
-                break
-
-        dfgroups = dataframe.to_html()
-        session["dfcsv"] = dataframe.to_csv()
-        return render_template("bulk_add.html", table=dfgroups, titles="Bulk Add")
-    else:
-        return "This isn't working. Let's go our own way."
-'''
-
 @app.route("/bulk_add", methods=["GET", "POST"])
+@key_required
 def bulk_add():
     if request.method == "POST":
         emails = request.form.get("emails")
@@ -269,10 +198,9 @@ def bulk_add():
                 emails = [email.strip() for email in emails]
             else:
                 emails = emails.split()
-        else:
-            emails = []
-            emails.append(emails)
+
         if groups:
+            print(groups)
             if "\n" in groups:
                 groups = groups.split("\n")
                 groups = [group.strip() for group in groups]
@@ -282,9 +210,6 @@ def bulk_add():
                 groups = [group.strip() for group in groups]
             else:
                 groups = groups.split()
-        else:
-            groups = []
-            groups.append(groups)
 
         if emails and groups:
             return api_add_ppl_groups(emails, groups)
@@ -293,11 +218,6 @@ def bulk_add():
         elif groups:
             return api_add_groups(groups)
     return render_template("bulk_add.html")
-
-
-#    for group in groups:
-#    groupdict = {}
-#    groupdict["name"] = group
 
 
 def api_add_ppl(emails):
@@ -364,28 +284,87 @@ def check_response(response):
         error = "Hm. Looks like something was wrong with the data you added."
         return render_template("bulk_add.html", error=error)
     else:
-        error = "Shrug"
-        return render_template("bulk_add.html", title="Shrug", errors=error)
+        error = "Something went wrong, but I'm not sure what."
+        return render_template("bulk_add.html", title="Shrug", error=error)
 
+@app.route("/load_templates", methods=["GET", "POST"])
+@key_required
+def load_templates():
+    count = 0
+    templates= []
+
+    while True:
+        count += 1
+        endpoint = "v2/custom_templates"
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-Api-Key": session["key"],
+        }
+        response = requests.get(url+endpoint, headers=headers)
+        data = response.json()
+        nextlink = data["links"]
+        for response in data["data"]:
+            name, body = (response["attributes"]["name"], response["attributes"]["body"])
+            templates.append((name,body))
+
+        if "next" not in nextlink:
+            break
+
+        return render_template("templates.html",
+                               title="Templates",
+                               templates=templates
+                               )
+
+    return render_template("options.html")
 
 @app.route("/templates", methods=["GET", "POST"])
+@key_required
 def templates():
-    pass
+    if request.method == "POST":
+        name = request.form.get('template_name')
+        body = request.form.get('body')
+        print(name)
+        endpoint = "v2/custom_templates"
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-Api-Key": session["key"],
+        }
+        payload = {"custom_template": {
+            "name":name,
+            "body":body
+            }}
+        response = requests.post(url+endpoint, json=payload, headers=headers)
+        return check_templates(response)
+    return render_template("templates.html", error="Uh oh!")
+
+def check_templates(response):
+    print(response)
+    response = str(response)
+    if "201" in response:
+        error = "Success! Templates Uploaded."
+        return render_template("templates.html", title="People Added", error=error)
+    elif "403" in response:
+        error = "Uh oh. Looks like you don't have appropriate privileges."
+        return render_template("templates.html", error=error)
+    else:
+        error = "Something went wrong, but I'm not sure what."
+        return render_template("templates.html", title="Shrug", error=error)
 
 
 @app.route("/bulk_courses_to_groups", methods=["GET", "POST"])
+@key_required
 def bulk_courses_to_groups():
     pass
 
 
 @app.route("/bulk_invite_ppl", methods=["GET", "POST"])
+@key_required
 def bulk_invite_ppl():
     pass
 
 
-# @app.teardown_request
-# def clear_session():
-#    session.clear()
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 

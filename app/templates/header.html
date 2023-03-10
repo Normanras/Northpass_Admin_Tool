@@ -1,9 +1,12 @@
 <!DOCTYPE html>
       <header class="header">
 
-	  <form class="navbutton" >
+	  <form class="navbutton"
+		id="render_home"
+		action="{{ url_for('render_home')}}"
+		method="post">
 	    <a class="navoption"
-	       href="{{ url_for('render_home')}}"
+	      onclick="document.forms['render_home'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-home-line card__icon"></i>
 	    <p class="navselection">Home</p>
@@ -23,23 +26,11 @@
 	  </form>
 
 	  <form class="navbutton"
-	    id="bulk_courses_to_groups"
-	    action="{{ url_for('bulk_courses_to_groups')}}"
+	    id="load_templates"
+	    action="{{ url_for('load_templates')}}"
 	    method="post">
 	    <a class="navoption"
-	      onclick="document.forms['bulk_add_course_groups'].submit()"
-	      style="cursor:pointer;">
-	    <i class="ri-car-line card__icon"></i>
-	    <p class="navselection">Add Courses</p>
-	    </a>
-	  </form>
-
-	  <form class="navbutton"
-	    id="templates"
-	    action="{{ url_for('templates')}}"
-	    method="post">
-	    <a class="navoption"
-	      onclick="document.forms['templates'].submit()"
+	      onclick="document.forms['load_templates'].submit()"
 	      style="cursor:pointer;">
 	    <i class="ri-car-line card__icon"></i>
 	    <p class="navselection">Templates</p>

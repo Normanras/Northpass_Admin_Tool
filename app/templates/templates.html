@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+<p>&nbsp;</p>
+{% if error %}
+<h3>{{ error }}</h4>
+{% endif %}
+{% if templates %}
+<h2> Here are the liquid templates </h2>
+{% endif %}
+<div class="templates_display" >
+{% for templates in templates %}
+  <p>&nbsp;</p>
+<div class="html_code">
+  <form
+    id="templates"
+    action="{{ url_for('templates')}}"
+    method="post">
+    <h2>
+      {{ templates[0] }}
+    </h2>
+  <textarea
+    placeholder={{ templates[0] }}
+    id="body"
+    name="body"
+    rows="35"
+    cols="100">
+	{{ templates[1] }}
+  </textarea>
+  <p>&nbsp;</p>
+  <label for="template_name">
+    Create New Template (optional):
+  </label>
+  <input
+      type="text"
+      name="template_name"
+      value="{{ templates[0] }}">
+  </input>
+  <p>&nbsp;</p>
+  <input type="submit" name="submit_template" value="Submit Template"</input>
+  </form>
+</div>
+</div>
+  <p>&nbsp;</p>
+{% endfor %}
+
