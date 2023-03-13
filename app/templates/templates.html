@@ -7,12 +7,13 @@
 <h3>{{ error }}</h4>
 {% endif %}
 {% if templates %}
-<h2> Here are the liquid templates </h2>
+<h2> Here are the liquid templates for </h2>
+<h2 style="color:#F05323"><strong> {{ session.school }} </strong></h2>
 {% endif %}
 <div class="templates_display" >
 {% for templates in templates %}
   <p>&nbsp;</p>
-<div class="html_code">
+<div class="window-body">
   <form
     id="templates"
     action="{{ url_for('templates')}}"
@@ -20,17 +21,20 @@
     <h2>
       {{ templates[0] }}
     </h2>
-  <textarea
-    placeholder={{ templates[0] }}
-    id="body"
-    name="body"
-    rows="35"
-    cols="100">
-	{{ templates[1] }}
-  </textarea>
-  <p>&nbsp;</p>
+    <code-input
+	lang="HTML"
+	value="{{ templates[1] }}"
+	id="editor"
+	name="body"
+	template="code-input">
+      {{ templates[1] }}
+    </code-input>
+    <textarea
+      name="loaded-content"
+      id="loaded-content"
+      style="width:100%;"></textarea>
   <label for="template_name">
-    Create New Template (optional):
+    Create New Template Name (optional):
   </label>
   <input
       type="text"
@@ -38,10 +42,67 @@
       value="{{ templates[0] }}">
   </input>
   <p>&nbsp;</p>
-  <input type="submit" name="submit_template" value="Submit Template"</input>
+  <div
+      name="load-template"
+      value="Load Changes"
+      onclick="copyToTextArea()"
+      style="cursor:pointer"
+      >Click here to load changes</div>
+  <input
+    type="submit"
+    name="submit-template"
+    value="Submit Template">
+  </input>
   </form>
 </div>
 </div>
   <p>&nbsp;</p>
 {% endfor %}
+<!--
+<h3> Advanced users only: create new template </h3>
+<p>&nbsp;</p>
+<div class="html_code">
+  <form
+    id="templates"
+    action="{{ url_for('templates')}}"
+    method="post">
+    <h2>
+      Enter the code below
+    </h2>
+  <textarea
+    id="body"
+    name="body"
+    rows="35"
+    cols="100">
+  </textarea>
+  <p>&nbsp;</p>
+  <label for="template_name">
+    Template Name:
+  </label>
+  <input
+      type="text"
+      name="template_name">
+  </input>
+  <p>&nbsp;</p>
+  <input type="submit" name="submit_template" value="Submit Template"</input>
+  </form>
+</div> -->
 
+  <script>
+    codeInput.registerTemplate("code-input", codeInput.templates.hljs(hljs,
+      [
+      ]));
+  </script>
+  <script>
+    codeInput.registerTemplate("code-input", codeInput.templates.prism(Prism, []));
+  </script>
+
+<script>
+function copyToTextArea() {
+  var code = document.getElementById("editor").value;
+  let textarea = document.getElementById("loaded-content");
+  textarea.textContent = code;
+  console.log(code);
+
+}
+  </script>

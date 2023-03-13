@@ -3,8 +3,8 @@ import itertools
 import re
 import os
 import csv
+from .forms import TemplateForm
 from functools import wraps
-from app import app
 from flask import (
     redirect,
     flash,
@@ -15,9 +15,7 @@ from flask import (
     url_for,
 )
 from werkzeug.utils import secure_filename
-
-# Global Variables
-url = "https://api.northpass.com/"
+from app import app, forms
 
 # Upload folder
 UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files"
@@ -25,6 +23,8 @@ UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/f
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {"csv"}
 
+# Global Variables
+url = "https://api.northpass.com/"
 
 def download_csv():
     if request.method == "GET":
@@ -200,7 +200,6 @@ def bulk_add():
                 emails = emails.split()
 
         if groups:
-            print(groups)
             if "\n" in groups:
                 groups = groups.split("\n")
                 groups = [group.strip() for group in groups]
@@ -305,7 +304,8 @@ def load_templates():
         data = response.json()
         nextlink = data["links"]
         for response in data["data"]:
-            name, body = (response["attributes"]["name"], response["attributes"]["body"])
+            name, body = (
+                    response["attributes"]["name"], response["attributes"]["body"])
             templates.append((name,body))
 
         if "next" not in nextlink:
@@ -313,7 +313,7 @@ def load_templates():
 
         return render_template("templates.html",
                                title="Templates",
-                               templates=templates
+                               templates=templates,
                                )
 
     return render_template("options.html")
@@ -322,31 +322,40 @@ def load_templates():
 @key_required
 def templates():
     if request.method == "POST":
-        name = request.form.get('template_name')
-        body = request.form.get('body')
-        print(name)
-        endpoint = "v2/custom_templates"
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "X-Api-Key": session["key"],
-        }
-        payload = {"custom_template": {
-            "name":name,
-            "body":body
-            }}
-        response = requests.post(url+endpoint, json=payload, headers=headers)
-        return check_templates(response)
-    return render_template("templates.html", error="Uh oh!")
+        if request.form['submit-template']:
+            name = request.form.get('template_name')
+            body = request.form.get("loaded-content")
+            if body == "":
+                error = "Ooph. Looks like you didn't load the changes before submitting."
+                return render_template("templates.html", error=error)
+            else:
+                endpoint = "v2/custom_templates"
+                headers = {
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                    "X-Api-Key": session["key"],
+                }
+                payload = {"custom_template": {
+                    "name":name,
+                    "body":body
+                    }}
+                response = requests.post(url+endpoint, json=payload, headers=headers)
+                return check_templates(response)
+    return load_templates()
 
 def check_templates(response):
     print(response)
     response = str(response)
     if "201" in response:
         error = "Success! Templates Uploaded."
-        return render_template("templates.html", title="People Added", error=error)
+        return render_template("templates.html",
+                               title="Templates Added",
+                               error=error)
     elif "403" in response:
         error = "Uh oh. Looks like you don't have appropriate privileges."
+        return render_template("templates.html", error=error)
+    elif "404" in response:
+        error = "Hm. Looks like something was wrong in the templates."
         return render_template("templates.html", error=error)
     else:
         error = "Something went wrong, but I'm not sure what."
@@ -364,10 +373,17 @@ def bulk_courses_to_groups():
 def bulk_invite_ppl():
     pass
 
+@app.route('/cmtest', methods = ['GET', 'POST'])
+def cmtest():
+    form = TemplateForm()
+    if form.validate_on_submit():
+        text = form.template_code.data
+    return render_template('templates.html', form=form)
+
 
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 
 
-if __name__ == "__main__":
-    ask_key()
+#if __name__ == "__main__":
+#    ask_key()

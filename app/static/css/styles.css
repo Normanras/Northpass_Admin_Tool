@@ -170,7 +170,7 @@ li {
 
 .man-csv-opts {
   display: flex;
-  justify-content: space-evenly;
+justify-content: space-evenly;
 
 }
 .csv-upload {
@@ -180,6 +180,15 @@ li {
 .navoption {
   color: var(--background);
   text-decoration: none;
+}
+
+.window-body {
+  display: flex;
+  justify-content: space-around;
+}
+
+#templates {
+  width: 75%;
 }
 
 #currentDate {
