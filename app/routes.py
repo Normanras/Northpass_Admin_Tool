@@ -13,6 +13,7 @@ from flask import (
     session,
     make_response,
     url_for,
+    g,
 )
 from werkzeug.utils import secure_filename
 from app import app, forms
@@ -25,6 +26,7 @@ ALLOWED_EXTENSIONS = {"csv"}
 
 # Global Variables
 url = "https://api.northpass.com/"
+
 
 def download_csv():
     if request.method == "GET":
@@ -57,10 +59,12 @@ def allowed_file(filename):
 def key_required(check):
     @wraps(check)
     def decorated_function(*args, **kwargs):
-        if session.get('key') is None:
-            return redirect('/',code=302)
+        if session.get("key") is None:
+            return redirect("/", code=302)
         return check(*args, **kwargs)
+
     return decorated_function
+
 
 @app.route("/", methods=["GET", "POST"])
 def ask_key():
@@ -71,8 +75,9 @@ def ask_key():
     specials = '"!@#$%^&*()-+?_=,<>/"'
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
-        if (any(char in specials for char in session["key"]) or
-                re.search(r"[\s]", session["key"])):
+        if any(char in specials for char in session["key"]) or re.search(
+            r"[\s]", session["key"]
+        ):
             error = "Invalid Key."
             session.clear()
             return render_template("index.html", title="Home", error=error)
@@ -100,7 +105,7 @@ def render_home():
 def clear_session():
     if session.get("key"):
         session.clear()
-        error="Session Cleared!"
+        error = "Session Cleared!"
         return render_template("index.html", error=error, title="Home, New session")
     return render_template("index.html", title="Home, New session")
 
@@ -108,6 +113,7 @@ def clear_session():
 @app.route("/table")
 def table():
     return render_template("table.html", tables=[session["table"]], titles=["Table"])
+
 
 @app.route("/upload_file", methods=["GET", "POST"])
 @key_required
@@ -133,11 +139,12 @@ def upload_file():
             return divide_values(file)
     return render_template("home.html", title="Bulk Add")
 
+
 def divide_values(file):
     emails = []
     groups = []
-    selection = request.form.get('learner-groups')
-    if request.form['submit']:
+    selection = request.form.get("learner-groups")
+    if request.form["submit"]:
         if selection == "all-groups":
             for item in file[1:]:
                 emails.append(item[0])
@@ -160,13 +167,12 @@ def divide_values(file):
                 return api_csv_parse(emails, groups)
             return emails
 
-    if request.form['preview']:
-        error="Preview Button Still Under Construction. Try again later."
+    if request.form["preview"]:
+        error = "Preview Button Still Under Construction. Try again later."
         return render_template("bulk_add.html", error=error, title="Preview Not Yet")
 
-    return render_template(
-        "bulk_add.html", title="Uploaded File"
-    )
+    return render_template("bulk_add.html", title="Uploaded File")
+
 
 def api_csv_parse(emails, groups):
     if emails and groups:
@@ -175,12 +181,14 @@ def api_csv_parse(emails, groups):
         return api_add_ppl(emails)
     elif groups:
         return api_add_groups(groups)
-    return render_template("bulk_add.html", table=htmlcsv, title="CSV Submission")
+    return render_template("bulk_add.html", title="CSV Submission")
+
 
 @app.route("/bulk_add_opts", methods=["GET", "POST"])
 @key_required
 def bulk_add_opts():
     return render_template("bulk_add.html", titles="Bulk Add Options")
+
 
 @app.route("/bulk_add", methods=["GET", "POST"])
 @key_required
@@ -223,8 +231,8 @@ def api_add_ppl(emails):
     payload2 = []
     endpoint = "v2/bulk/people"
     for email in emails:
-        payload2.append({"email": email })
-    payload = {"data": {"attributes": {"people": payload2 }}}
+        payload2.append({"email": email})
+    payload = {"data": {"attributes": {"people": payload2}}}
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
@@ -239,8 +247,8 @@ def api_add_groups(groups):
     payload2 = []
     endpoint = "v2/bulk/people"
     for group in groups:
-        payload2.append({"groups" : group })
-    payload = {"data": {"attributes": {"people": payload2 }}}
+        payload2.append({"groups": group})
+    payload = {"data": {"attributes": {"people": payload2}}}
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
@@ -257,9 +265,7 @@ def api_add_ppl_groups(emails, groups):
     combinations = list(itertools.product(emails, groups))
     for combo in combinations:
         payload2.append({"email": combo[0], "groups": combo[1]})
-    payload = {
-        "data": {"attributes": {"people": payload2 }}
-    }
+    payload = {"data": {"attributes": {"people": payload2}}}
 
     headers = {
         "accept": "application/json",
@@ -267,8 +273,8 @@ def api_add_ppl_groups(emails, groups):
         "X-Api-Key": session["key"],
     }
     return payload
-    #response = requests.post(url + endpoint, json=payload, headers=headers)
-    #return check_response(response)
+    # response = requests.post(url + endpoint, json=payload, headers=headers)
+    # return check_response(response)
 
 
 def check_response(response):
@@ -286,11 +292,12 @@ def check_response(response):
         error = "Something went wrong, but I'm not sure what."
         return render_template("bulk_add.html", title="Shrug", error=error)
 
+
 @app.route("/load_templates", methods=["GET", "POST"])
 @key_required
 def load_templates():
     count = 0
-    templates= []
+    templates = []
 
     while True:
         count += 1
@@ -300,33 +307,44 @@ def load_templates():
             "content-type": "application/json",
             "X-Api-Key": session["key"],
         }
-        response = requests.get(url+endpoint, headers=headers)
+        response = requests.get(url + endpoint, headers=headers)
         data = response.json()
         nextlink = data["links"]
         for response in data["data"]:
-            name, body = (
-                    response["attributes"]["name"], response["attributes"]["body"])
-            templates.append((name,body))
+            last_updated = response["attributes"]["updated_at"].split("T")
+            last_updated = last_updated[0]
+            name, body, last_updated = (
+                response["attributes"]["name"],
+                response["attributes"]["body"],
+                last_updated,
+            )
+            templates.append((name, body, last_updated))
 
         if "next" not in nextlink:
             break
 
-        return render_template("templates.html",
-                               title="Templates",
-                               templates=templates,
-                               )
+        save_templates_backup(templates)
+        return render_template(
+            "templates.html",
+            title="Templates",
+            templates=templates,
+        )
 
     return render_template("options.html")
+
 
 @app.route("/templates", methods=["GET", "POST"])
 @key_required
 def templates():
     if request.method == "POST":
-        if request.form['submit-template']:
-            name = request.form.get('template_name')
-            body = request.form.get("loaded-content")
+        if request.form["submit-template"]:
+            name = request.form.get("template_name")
+            body = request.form.get("body")
+            g.last_template = name
             if body == "":
-                error = "Ooph. Looks like you didn't load the changes before submitting."
+                error = (
+                    "Ooph. Looks like you didn't load the changes before submitting."
+                )
                 return render_template("templates.html", error=error)
             else:
                 endpoint = "v2/custom_templates"
@@ -335,22 +353,21 @@ def templates():
                     "content-type": "application/json",
                     "X-Api-Key": session["key"],
                 }
-                payload = {"custom_template": {
-                    "name":name,
-                    "body":body
-                    }}
-                response = requests.post(url+endpoint, json=payload, headers=headers)
+                payload = {"custom_template": {"name": name, "body": body}}
+                response = requests.post(url + endpoint, json=payload, headers=headers)
                 return check_templates(response)
     return load_templates()
+
 
 def check_templates(response):
     print(response)
     response = str(response)
     if "201" in response:
         error = "Success! Templates Uploaded."
-        return render_template("templates.html",
-                               title="Templates Added",
-                               error=error)
+        button = "Undo"
+        return render_template(
+            "templates.html", title="Templates Added", error=error, button=button
+        )
     elif "403" in response:
         error = "Uh oh. Looks like you don't have appropriate privileges."
         return render_template("templates.html", error=error)
@@ -362,28 +379,44 @@ def check_templates(response):
         return render_template("templates.html", title="Shrug", error=error)
 
 
-@app.route("/bulk_courses_to_groups", methods=["GET", "POST"])
+def save_templates_backup(templates):
+    g.client_path = os.path.join(UPLOAD_FOLDER, session["school"])
+    if os.path.exists(g.client_path):
+        pass
+    else:
+        os.mkdir(g.client_path)
+
+    for tupe in templates:
+        file_name = tupe[0] + ".liquid"
+        file_body = tupe[1]
+        complete_path = os.path.join(g.client_path, file_name)
+
+        with open(complete_path, "w+") as temp:
+            temp.write(file_body)
+            temp.close
+
+
+@app.route("/undo_template", methods=["POST"])
 @key_required
-def bulk_courses_to_groups():
-    pass
+def undo_template():
+    print(g.client_path)
+    template_path = os.path.join(g.client_path, g.last_template)
+    if request.method == "POST":
+        if request.form["undo_templates"]:
+            if os.path.exists(template_path):
+                print(template_path)
 
 
-@app.route("/bulk_invite_ppl", methods=["GET", "POST"])
-@key_required
-def bulk_invite_ppl():
-    pass
-
-@app.route('/cmtest', methods = ['GET', 'POST'])
+@app.route("/cmtest", methods=["GET", "POST"])
 def cmtest():
     form = TemplateForm()
     if form.validate_on_submit():
         text = form.template_code.data
-    return render_template('templates.html', form=form)
-
+    return render_template("templates.html", form=form)
 
 
 app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    ask_key()

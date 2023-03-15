@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+<p>&nbsp;</p>
+{% if error %}
+<h3>{{ error }}</h4>
+{% endif %}
+
+<form method="POST" action="/">
+    {{ form.name.label }} {{ form.name(size=20) }}
+    <input type="submit" value="Go">
+</form>

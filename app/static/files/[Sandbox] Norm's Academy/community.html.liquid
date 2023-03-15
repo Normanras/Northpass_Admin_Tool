@@ -1,0 +1,33 @@
+	{% include 'header' %}
+<main class="np-main np-homepage">
+  <div class="np-homepage-hero">
+    <h1 class="community-headline">Explore</h1>
+  </div>
+  {% include 'sub_navigation' %}
+  <div class='discussion-container' style="border: 18px solid rgb(0, 0, 0); overflow: hidden; margin-left: 100px; margin-top: 35px; width: 1065px;">
+    <iframe scrolling="yes" src="https://www.mountainproject.com/" style="border: 0px none; margin-left: 15px auto; height: 1954px; margin-top: -100px; width: 1060px;"></iframe>
+    </div>
+</main>
+{% include 'footer' %}
+
+<style>
+  .discussion-frame {
+    min-width: 100%;
+    margin-left: -10px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .discussion-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .community-headline {
+    font-size: 32px;
+    line-height: 48px;
+    font-family: "Raleway", "Helvetic", "Arial" sans-serif;
+    color: #ffffff;
+  }
+</style>
+  
