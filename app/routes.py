@@ -1,8 +1,13 @@
 import requests
+import shutil
 import itertools
 import re
 import os
 import csv
+import glob
+import pathlib
+from flask_socketio import SocketIO
+from datetime import datetime, timezone
 from .forms import TemplateForm
 from functools import wraps
 from flask import (
@@ -19,12 +24,15 @@ from werkzeug.utils import secure_filename
 from app import app, forms
 
 # Upload folder
-UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files"
-# UPLOAD_FOLDER = 'static/files'
+UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/csv"
+TEMPLATES_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/templates/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["TEMPLATES_FOLDER"] = TEMPLATES_FOLDER
 ALLOWED_EXTENSIONS = {"csv"}
 
 # Global Variables
+socketio = SocketIO(app)
+specials = '"!@#$%^&[]*()-+?_=,<>/"'
 url = "https://api.northpass.com/"
 
 
@@ -72,7 +80,6 @@ def ask_key():
     Without this key, no other functions will work.
     It also assigns the api key to the session and clears the session upon each reload.
     """
-    specials = '"!@#$%^&*()-+?_=,<>/"'
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
         if any(char in specials for char in session["key"]) or re.search(
@@ -104,6 +111,19 @@ def render_home():
 @app.route("/clear_session", methods=["GET", "POST"])
 def clear_session():
     if session.get("key"):
+        if session.get("client_path"):
+            client = session["client_path"]
+            print(client)
+            wildcard = glob.glob(client + '_*')
+            print(wildcard)
+            for directory in wildcard:
+                print(directory)
+                try:
+                    shutil.rmtree(directory)
+                    print(directory)
+                except OSError:
+                    print(OSError)
+                    print("Error?")
         session.clear()
         error = "Session Cleared!"
         return render_template("index.html", error=error, title="Home, New session")
@@ -118,7 +138,6 @@ def table():
 @app.route("/upload_file", methods=["GET", "POST"])
 @key_required
 def upload_file():
-    print("Uploading CSV")
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file found or uploaded")
@@ -312,6 +331,8 @@ def load_templates():
         nextlink = data["links"]
         for response in data["data"]:
             last_updated = response["attributes"]["updated_at"].split("T")
+            full_updated = response["attributes"]["updated_at"]
+            g.full_updated = datetime.fromisoformat(full_updated)
             last_updated = last_updated[0]
             name, body, last_updated = (
                 response["attributes"]["name"],
@@ -340,7 +361,6 @@ def templates():
         if request.form["submit-template"]:
             name = request.form.get("template_name")
             body = request.form.get("body")
-            g.last_template = name
             if body == "":
                 error = (
                     "Ooph. Looks like you didn't load the changes before submitting."
@@ -355,15 +375,18 @@ def templates():
                 }
                 payload = {"custom_template": {"name": name, "body": body}}
                 response = requests.post(url + endpoint, json=payload, headers=headers)
-                return check_templates(response)
+                return check_templates(response, name)
     return load_templates()
 
 
-def check_templates(response):
-    print(response)
+def check_templates(response, name):
     response = str(response)
     if "201" in response:
-        error = "Success! Templates Uploaded."
+        error = (
+            f"Success! The {name} template was successfully uploaded for "
+            + session["school"]
+            + "."
+        )
         button = "Undo"
         return render_template(
             "templates.html", title="Templates Added", error=error, button=button
@@ -380,16 +403,25 @@ def check_templates(response):
 
 
 def save_templates_backup(templates):
-    g.client_path = os.path.join(UPLOAD_FOLDER, session["school"])
-    if os.path.exists(g.client_path):
+    session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["school"])
+    if any(char in specials for char in session["client_path"]):
+        for char in specials:
+            session["sanitized_path"] = session["client_path"].replace(char,"")
+            print(session["sanitized_path"])
+    else:
+        session["sanitized_path"] = session["client_path"]
+    print(session["client_path"])
+    today = datetime.now(timezone.utc)
+    if os.path.exists(session["client_path"]):
         pass
     else:
-        os.mkdir(g.client_path)
+        path = session["client_path"] + "_" + str(today)
+        os.mkdir(path)
 
     for tupe in templates:
         file_name = tupe[0] + ".liquid"
         file_body = tupe[1]
-        complete_path = os.path.join(g.client_path, file_name)
+        complete_path = os.path.join(path, file_name)
 
         with open(complete_path, "w+") as temp:
             temp.write(file_body)
@@ -399,12 +431,18 @@ def save_templates_backup(templates):
 @app.route("/undo_template", methods=["POST"])
 @key_required
 def undo_template():
-    print(g.client_path)
-    template_path = os.path.join(g.client_path, g.last_template)
     if request.method == "POST":
         if request.form["undo_templates"]:
-            if os.path.exists(template_path):
-                print(template_path)
+            pass
+
+@socketio.on("disconnect")
+def test_disconnect():
+    print("Client disconnected")
+
+
+@socketio.on("connect")
+def test_connect():
+    print("connection established")
 
 
 @app.route("/cmtest", methods=["GET", "POST"])
