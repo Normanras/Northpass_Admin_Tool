@@ -21,8 +21,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/WebCoder49/code-input@1.2.2/code-input.min.css">
     <link href="{{ url_for('static', filename='css/prism.css')}}" rel="stylesheet" />
   </head>
+
 <body>
 {% block content %} {% endblock %}
+
 <script src="{{ url_for('static', filename='css/prism.js' )}}"></script>
 <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
   <script>
@@ -30,5 +32,6 @@
       window.history.replaceState( null, null, window.location.href );
     }
   </script>
+
 </body>
 </html>

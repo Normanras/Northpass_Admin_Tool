@@ -5,11 +5,12 @@ import re
 import os
 import csv
 import glob
-import pathlib
-from flask_socketio import SocketIO
-from datetime import datetime, timezone
-from .forms import TemplateForm
+# import eventlet
+from datetime import datetime, timezone, timedelta
+# from flask_socketio import SocketIO
+# from flask_session import Session
 from functools import wraps
+import flask
 from flask import (
     redirect,
     flash,
@@ -21,18 +22,25 @@ from flask import (
     g,
 )
 from werkzeug.utils import secure_filename
-from app import app, forms
+from app import app
 
-# Upload folder
 UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/csv"
 TEMPLATES_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/templates/"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_FOLDER"] = TEMPLATES_FOLDER
 ALLOWED_EXTENSIONS = {"csv"}
 
+#SESSION_PERMANENT = False
+#PERMANENT_SESSION_LIFETIME = 1800
+app.config.update(SECRET_KEY=os.urandom(24))
+app.permanent_session_lifetime = timedelta(minutes=5)
+# flask.session.modified = True
+
 # Global Variables
-socketio = SocketIO(app)
-specials = "'!@#$%^&*()\[\]-+?_=,<>/'"
+#eventlet.monkey_patch()
+#socketio = SocketIO(app)
+
+specials = '"!@#$%^&*()-+?_=,<>/"'
 url = "https://api.northpass.com/"
 
 
@@ -422,7 +430,6 @@ def save_templates_backup(templates):
             temp.write(file_body)
             temp.close
 
-
 @app.route("/undo_template", methods=["POST"])
 @key_required
 def undo_template():
@@ -430,26 +437,39 @@ def undo_template():
         if request.form["undo_templates"]:
             pass
 
-@socketio.on("disconnect")
-def test_disconnect():
-    print("Client disconnected")
+@app.route("/stop", methods=["POST"])
+def stop():
+    print("stopping")
 
+'''
 
-@socketio.on("connect")
+@socketio.on('disconnect')
+def client_disconnect():
+    clear_session()
+    print("Disconnected!")
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+
+@socketio.on('connect')
 def test_connect():
     print("connection established")
 
+@app.before_request
+def before_request_func():
+    print("before_request executing!")
 
-@app.route("/cmtest", methods=["GET", "POST"])
-def cmtest():
-    form = TemplateForm()
-    if form.validate_on_submit():
-        text = form.template_code.data
-    return render_template("templates.html", form=form)
-
-
-app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
-
+@app.after_request
+def after_request_func(response):
+    print("after_request executing!")
+    return response
+'''
+    # flask.session.permanent = False
+    # app.permanent_session_lifetime = datetime.timedelta(minutes=20)
+    # flask.session.modified = True
+    # flask.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 
 # if __name__ == "__main__":
+#    socketio.run(app, debug=True)
 #    ask_key()
