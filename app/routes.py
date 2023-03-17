@@ -32,7 +32,7 @@ ALLOWED_EXTENSIONS = {"csv"}
 
 # Global Variables
 socketio = SocketIO(app)
-specials = '"!@#$%^&[]*()-+?_=,<>/"'
+specials = "'!@#$%^&*()\[\]-+?_=,<>/'"
 url = "https://api.northpass.com/"
 
 
@@ -56,7 +56,8 @@ def key_response(response):
 
 def correct_key(response):
     data = response.json()
-    session["school"] = data["data"]["attributes"]["properties"]["name"]
+    session["raw_school"] = data["data"]["attributes"]["properties"]["name"]
+    session["sani_school"] = session["raw_school"].replace('[','').replace(']', '')
     return render_template("home.html", title="Active Session")
 
 
@@ -384,7 +385,7 @@ def check_templates(response, name):
     if "201" in response:
         error = (
             f"Success! The {name} template was successfully uploaded for "
-            + session["school"]
+            + session["raw_school"]
             + "."
         )
         button = "Undo"
@@ -403,13 +404,7 @@ def check_templates(response, name):
 
 
 def save_templates_backup(templates):
-    session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["school"])
-    if any(char in specials for char in session["client_path"]):
-        for char in specials:
-            session["sanitized_path"] = session["client_path"].replace(char,"")
-            print(session["sanitized_path"])
-    else:
-        session["sanitized_path"] = session["client_path"]
+    session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["sani_school"])
     print(session["client_path"])
     today = datetime.now(timezone.utc)
     if os.path.exists(session["client_path"]):
