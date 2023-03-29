@@ -1,0 +1,39 @@
+{% include "header" %}
+{% include "course_version_outdated_alert", courses: courses.in_catalog %}
+<div class="np-homepage-hero">
+  <div class="np-homepage-hero-image">
+  </div>
+  <div class="np-homepage-hero-content">
+    <div class="np-homepage-headline np-header-font-color">
+      Menlo Security Resrouces
+    </div>
+    <div class="np-homepage-subheadline np-header-font-color">
+      Resources to help you make the most of your Security Training
+    </div>
+  </div>
+</div>
+{% include "sub_navigation" %}
+  {% include "courses_catalog" %}
+</main>
+{% include "footer" %}
+
+<style>
+  .np-card-content-description {
+    height: 100px;
+  }
+  .np-card-content-title {
+    height: 58px;
+    overflow: clip;
+  }
+</style>
+
+
+<script>
+  window.onload = function() {
+    [].slice.call(document.getElementsByClassName("np-card-content-description")).forEach(function(element) {
+      if(element.innerText.length > 150){
+        element.innerText = element.innerText.slice(0,150) + '...'
+      }
+    });
+  }
+</script>

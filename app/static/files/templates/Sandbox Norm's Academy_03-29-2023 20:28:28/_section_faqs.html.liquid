@@ -1,0 +1,109 @@
+ <div class="np-homepage-featured np-faq np-max-width">
+    <div class="np-homepage-featured-text">
+      <div class="np-homepage-headline">
+        Frequently Asked Questions
+      </div>
+    </div>
+    <div class="row np-faqs">
+        <div class="col-md-6">
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> I'm not in shape. Can I still go to a climbing gym?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong> Absolutely. Climbing is a wonderful full-body and full-mind workout. If you're looking to get in shapre but tired of pumping iron, climbing is a fantastic option.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> I'm scared of heights. Should I try climbing?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong> Many climbers have a fear of heights! However, it goes away when you use your own strength and technique to get to the top of a wall. Start small by climbing in a gym first.</p>
+                    </div> 
+                </div>
+            </div>
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> Should I hire someone to belay me at a gym?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong> You absolutely can as a quick introduction. However, what would be even better is to grab a friend and take a belay class at your local gym.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> What is bouldering?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong> Great question! Bouldering is a form of climbing, done on shorter walls. You use a crash pad under your climb to cushion your fall. Be warned, bouldering is much more powerful and has a steeper learning curve.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> What are those people with all that gear hanging from their harness doing?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong> Chances are you saw a trad climber! Short for traditional climbing, that gear serves as removable protection. When the climbing pair is done with the climb, nothing is left on the rock.</p>
+                    </div> 
+                </div>
+            </div>
+            <div class="np-accordion">
+                <div class="accordion-btn">
+                    <i class="fal fa-plus"></i>
+                    <div class="accordion-title"><strong>Q:</strong> None of my friends are interested in climbing. How can I find partners?</div>
+                </div>
+                <div class="accordion-panel">
+                    <div class="accordion-panel-content">
+                        <p><strong>A:</strong>The best way to meet people is to join a gym a start climbing! Climbers are social and you'll start meeting people. You can also use online resources like Mountain Project's Partner Finder.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+/
+<style>
+    .fa-plus {
+        background-image: unset;
+        background: #0297FA;
+    }
+    .fa-minus {
+        background-image: unset;
+        background: #0297FA;    }
+</style>
+
+<script>
+    let accordions = document.getElementsByClassName("accordion-btn");
+
+    for (let i = 0; i < accordions.length; i++) {
+        accordions[i].addEventListener("click", function() {
+            this.querySelector('.fal').classList.toggle("fa-plus");
+            this.querySelector('.fal').classList.toggle("fa-minus");
+
+            let panel = this.nextElementSibling;
+            panel.classList.toggle("panel-open");
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+</script>

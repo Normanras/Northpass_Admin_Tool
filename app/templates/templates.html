@@ -7,6 +7,7 @@
 <h3>{{ error }}</h4>
 {% endif %}
 
+
 {% if button %}
 <br>
 <form
@@ -19,7 +20,7 @@
 
 {% if templates %}
 <h2> Here are the liquid templates for </h2>
-<h2 style="color:#F05323"><strong> {{ session.school }} </strong></h2>
+<h2 style="color:#F05323"><strong> {{ session.raw_school }} </strong></h2>
 {% endif %}
 <div class="templates_display" >
 {% for templates in templates %}
@@ -73,7 +74,8 @@
 	lang="HTML"
 	id="editor"
 	name="body"
-	template="code-input">
+	template="code-input"
+	style="height:550px;">
     </code-input>
   <p>&nbsp;</p>
   <label for="template_name">
@@ -88,6 +90,15 @@
   </form>
 </div>
 {% endif %}
+<div class="floating-container">
+  <div class="floating-button">
+    <a href="{{ url_for('download_templates') }}">
+      <span class="float-element tooltip-left">
+      <i class="material-icons">download_for_offline
+      </i></a>
+    </span>
+  </div>
+</div>
 
   <script>
     codeInput.registerTemplate("code-input", codeInput.templates.hljs(hljs,

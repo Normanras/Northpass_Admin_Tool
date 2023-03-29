@@ -205,6 +205,10 @@ justify-content: space-evenly;
   justify-content: space-evenly;
 }
 
+#editor{
+  height:550px;
+}
+
 @media screen and (max-width: 1250px) {
   h1 {
     display: flex;
@@ -224,114 +228,132 @@ ul {
   text-align: center;
 }
 
-/* 1.? - Card Layout in options.html only */
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 100px;
-  grid-gap: 2rem;
-  padding: 20px;
+/*
+@-webkit-keyframes come-in {
+  0% {
+    -webkit-transform: translatey(100px);
+            transform: translatey(100px);
+    opacity: 0;
+  }
+  30% {
+    -webkit-transform: translateX(-50px) scale(0.4);
+            transform: translateX(-50px) scale(0.4);
+  }
+  70% {
+    -webkit-transform: translateX(0px) scale(1.2);
+            transform: translateX(0px) scale(1.2);
+  }
+  100% {
+    -webkit-transform: translatey(0px) scale(1);
+            transform: translatey(0px) scale(1);
+    opacity: 1;
+  }
 }
+@keyframes come-in {
+  0% {
+    -webkit-transform: translatey(100px);
+            transform: translatey(100px);
+    opacity: 0;
+  }
+  30% {
+    -webkit-transform: translateX(-50px) scale(0.4);
+            transform: translateX(-50px) scale(0.4);
+  }
+  70% {
+    -webkit-transform: translateX(0px) scale(1.2);
+            transform: translateX(0px) scale(1.2);
+  }
+  100% {
+    -webkit-transform: translatey(0px) scale(1);
+            transform: translatey(0px) scale(1);
+    opacity: 1;
+  }
+}*/
 
-.card {
-  background-color: #089FB7;
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid #66C92D;
-  color: #FFFFFF;
-}
-
-.card:hover,
-.card:focus {
-  transform: scale(1.02);
-}
-
-.card:focus > .card__name {
+.floating-container {
+  position: fixed;
+  width: 100px;
+  height: 100px;
   bottom: 0;
+  right: 0;
+  margin: 35px 25px;
 }
-
-.card:checked > .card__name {
+.floating-container:hover {
+  height: 300px;
+}
+.floating-container:hover .floating-button {
+  box-shadow: 0 10px 25px rgba(44, 179, 240, 0.6);
+  -webkit-transform: translatey(5px);
+          transform: translatey(5px);
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.floating-container:hover .element-container .float-element:nth-child(1) {
+  -webkit-animation: come-in 0.4s forwards 0.2s;
+          animation: come-in 0.4s forwards 0.2s;
+}
+.floating-container:hover .element-container .float-element:nth-child(2) {
+  -webkit-animation: come-in 0.4s forwards 0.4s;
+          animation: come-in 0.4s forwards 0.4s;
+}
+.floating-container:hover .element-container .float-element:nth-child(3) {
+  -webkit-animation: come-in 0.4s forwards 0.6s;
+          animation: come-in 0.4s forwards 0.6s;
+}
+.floating-container .floating-button {
+  position: absolute;
+  width: 65px;
+  height: 65px;
+  background: #66C92E;
   bottom: 0;
-}
-
-.card__icon {
-  font-size: 2rem;
-  padding: 1rem;
-  display: grid;
-}
-
-.card__name {
-  font-weight: 400;
-  transform: translate(-50%, -50%);
-  position: relative;
-  left: 50%;
-  transition: 0.1s;
-}
-
-/* Styling for the options2.html file only */
-
-.fields {
-  display: grid;
-  width: 60px; height: 40px; margin: 0;
-  appearance: none; -webkit-appearance: none;
+  border-radius: 50%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  color: white;
+  line-height: 70px;
+  text-align: center;
+  font-size: 23px;
+  z-index: 100;
+  box-shadow: 0 10px 25px -5px rgba(44, 179, 240, 0.6);
   cursor: pointer;
-  background: var(--background-dark);
-  border-radius: 20px;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
 }
-
-input:not(:nth-of-type(4n+1))::before,
-input:nth-of-type(n+5)::after {
-  content: '';
-  border-radius: 20px;
-  pointer-events: none;
-  grid-area: 1/1;
+.material-icons{
+  line-height: 0;
+  color: white;
 }
-
-input:not(:nth-of-type(4n+1))::before { transform: translatex(-85px); }
-
-input:nth-of-type(n+5)::after { transform: translatey(-60px); }
-
-input:checked { background: limegreen; }
-
-/* a checked box's right borders */
-input:not(:nth-of-type(4n)):checked + input:checked::before {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  background: limegreen;
+/*
+.floating-container .float-element {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 15px auto;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  line-height: 50px;
+  z-index: 0;
+  opacity: 0;
+  -webkit-transform: translateY(100px);
+          transform: translateY(100px);
 }
-/* a checked box's bottom borders */
-input:nth-last-of-type(n+5):checked + * + * + * + input:checked::after {
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-  background: limegreen;
+.floating-container .float-element .material-icons {
+  vertical-align: middle;
+  font-size: 16px;
 }
-/* a checked box's adjacent (rightside) checked box's left borders */
-input:not(:nth-of-type(4n)):checked + input:checked + input::before {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  background: limegreen;
+.floating-container .float-element:nth-child(1) {
+  background: #42A5F5;
+  box-shadow: 0 20px 20px -10px rgba(66, 165, 245, 0.5);
 }
-/* a checked box's adjacent (below) checked box's top borders */
-input:not(:nth-of-type(4n)):checked + * + * + * +  input:checked + input::before {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  background: limegreen;
+.floating-container .float-element:nth-child(2) {
+  background: #4CAF50;
+  box-shadow: 0 20px 20px -10px rgba(76, 175, 80, 0.5);
 }
-/* a checked box's (in last column) left borders */
-input:nth-of-type(4n-1):checked + input:checked {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-/* a checked box's (in last column) adjacent (below) checked box's top borders */
-input:nth-of-type(4n):checked + * + * + * + input:checked {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.selections {
-  display: grid;
-  grid:  repeat(5, 60px) / repeat(4, 85px);
-  align-items: center; justify-items: center;
-  margin: 0;
-}
+.floating-container .float-element:nth-child(3) {
+  background: #FF9800;
+  box-shadow: 0 20px 20px -10px rgba(255, 152, 0, 0.5);
+}*/

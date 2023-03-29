@@ -1,10 +1,14 @@
 import requests
+import shutil
 import itertools
 import re
 import os
 import csv
-from .forms import TemplateForm
+import glob
+import zipfile
+from datetime import datetime, timezone, timedelta
 from functools import wraps
+import flask
 from flask import (
     redirect,
     flash,
@@ -14,17 +18,26 @@ from flask import (
     make_response,
     url_for,
     g,
+    send_file,
 )
 from werkzeug.utils import secure_filename
-from app import app, forms
+from app import app
 
-# Upload folder
-UPLOAD_FOLDER = "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files"
-# UPLOAD_FOLDER = 'static/files'
+UPLOAD_FOLDER = (
+    "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/csv/"
+)
+TEMPLATES_FOLDER = (
+    "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/templates/"
+)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["TEMPLATES_FOLDER"] = TEMPLATES_FOLDER
 ALLOWED_EXTENSIONS = {"csv"}
 
-# Global Variables
+app.config.update(SECRET_KEY=os.urandom(24))
+app.permanent_session_lifetime = timedelta(minutes=30)
+
+
+specials = '"!@#$%^&*()-+?_=,<>/"'
 url = "https://api.northpass.com/"
 
 
@@ -48,7 +61,8 @@ def key_response(response):
 
 def correct_key(response):
     data = response.json()
-    session["school"] = data["data"]["attributes"]["properties"]["name"]
+    session["raw_school"] = data["data"]["attributes"]["properties"]["name"]
+    session["sani_school"] = session["raw_school"].replace("[", "").replace("]", "")
     return render_template("home.html", title="Active Session")
 
 
@@ -72,7 +86,6 @@ def ask_key():
     Without this key, no other functions will work.
     It also assigns the api key to the session and clears the session upon each reload.
     """
-    specials = '"!@#$%^&*()-+?_=,<>/"'
     if request.method == "POST":
         session["key"] = request.form.get("apikey")
         if any(char in specials for char in session["key"]) or re.search(
@@ -104,6 +117,15 @@ def render_home():
 @app.route("/clear_session", methods=["GET", "POST"])
 def clear_session():
     if session.get("key"):
+        if session.get("client_path"):
+            client = session["client_path"]
+            wildcard = glob.glob(client + "_*")
+            for directory in wildcard:
+                try:
+                    shutil.rmtree(directory)
+                except OSError:
+                    print(OSError)
+                    print("Error?")
         session.clear()
         error = "Session Cleared!"
         return render_template("index.html", error=error, title="Home, New session")
@@ -118,7 +140,6 @@ def table():
 @app.route("/upload_file", methods=["GET", "POST"])
 @key_required
 def upload_file():
-    print("Uploading CSV")
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file found or uploaded")
@@ -312,6 +333,8 @@ def load_templates():
         nextlink = data["links"]
         for response in data["data"]:
             last_updated = response["attributes"]["updated_at"].split("T")
+            full_updated = response["attributes"]["updated_at"]
+            g.full_updated = datetime.fromisoformat(full_updated)
             last_updated = last_updated[0]
             name, body, last_updated = (
                 response["attributes"]["name"],
@@ -340,7 +363,6 @@ def templates():
         if request.form["submit-template"]:
             name = request.form.get("template_name")
             body = request.form.get("body")
-            g.last_template = name
             if body == "":
                 error = (
                     "Ooph. Looks like you didn't load the changes before submitting."
@@ -355,15 +377,18 @@ def templates():
                 }
                 payload = {"custom_template": {"name": name, "body": body}}
                 response = requests.post(url + endpoint, json=payload, headers=headers)
-                return check_templates(response)
+                return check_templates(response, name)
     return load_templates()
 
 
-def check_templates(response):
-    print(response)
+def check_templates(response, name):
     response = str(response)
     if "201" in response:
-        error = "Success! Templates Uploaded."
+        error = (
+            f"Success! The {name} template was successfully uploaded for "
+            + session["raw_school"]
+            + "."
+        )
         button = "Undo"
         return render_template(
             "templates.html", title="Templates Added", error=error, button=button
@@ -380,43 +405,60 @@ def check_templates(response):
 
 
 def save_templates_backup(templates):
-    g.client_path = os.path.join(UPLOAD_FOLDER, session["school"])
-    if os.path.exists(g.client_path):
+    session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["sani_school"])
+    today = datetime.now(timezone.utc)
+    today = today.strftime("%m-%d-%Y %H:%M:%S")
+    session["client_path"] = session["client_path"] + "_" + str(today)
+    if os.path.exists(session["client_path"]):
         pass
     else:
-        os.mkdir(g.client_path)
+        os.mkdir(session["client_path"])
 
     for tupe in templates:
         file_name = tupe[0] + ".liquid"
         file_body = tupe[1]
-        complete_path = os.path.join(g.client_path, file_name)
+        complete_path = os.path.join(session["client_path"], file_name)
 
         with open(complete_path, "w+") as temp:
             temp.write(file_body)
             temp.close
 
 
+@app.route("/download_templates", methods=["GET", "POST"])
+@key_required
+def download_templates():
+    zipped_file = f"{session['sani_school']}.zip"
+    zipped_file = zipped_file.replace(" ", "")
+    zipped_file = zipped_file.replace("'", "")
+    os.chdir = session["client_path"]
+    # zipped_file = os.path.join(session["client_path"], zipped_file)
+    file_path = session["client_path"]
+    zipped_path = os.path.join(TEMPLATES_FOLDER, zipped_file)
+    download = shutil.make_archive(zipped_path, 'zip', file_path)
+
+    return send_file(download, as_attachment=True)
+
+def delete_zip():
+    pass
+
 @app.route("/undo_template", methods=["POST"])
 @key_required
 def undo_template():
-    print(g.client_path)
-    template_path = os.path.join(g.client_path, g.last_template)
     if request.method == "POST":
         if request.form["undo_templates"]:
-            if os.path.exists(template_path):
-                print(template_path)
+            pass
 
 
-@app.route("/cmtest", methods=["GET", "POST"])
-def cmtest():
-    form = TemplateForm()
-    if form.validate_on_submit():
-        text = form.template_code.data
-    return render_template("templates.html", form=form)
+@app.route("/stop", methods=["POST"])
+def stop():
+    print("stopping")
 
-
-app.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
+    # flask.session.permanent = False
+    # app.permanent_session_lifetime = datetime.timedelta(minutes=20)
+    # flask.session.modified = True
+    # flask.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
 
 
 # if __name__ == "__main__":
+#    socketio.run(app, debug=True)
 #    ask_key()
