@@ -5,7 +5,6 @@ import re
 import os
 import csv
 import glob
-import zipfile
 from datetime import datetime, timezone, timedelta
 from functools import wraps
 import flask
@@ -63,6 +62,7 @@ def correct_key(response):
     data = response.json()
     session["raw_school"] = data["data"]["attributes"]["properties"]["name"]
     session["sani_school"] = session["raw_school"].replace("[", "").replace("]", "")
+    session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["sani_school"])
     return render_template("home.html", title="Active Session")
 
 
@@ -117,9 +117,13 @@ def render_home():
 @app.route("/clear_session", methods=["GET", "POST"])
 def clear_session():
     if session.get("key"):
+        print("key exists")
+        print(session["key"])
         if session.get("client_path"):
             client = session["client_path"]
+            print(client)
             wildcard = glob.glob(client + "_*")
+            print(wildcard)
             for directory in wildcard:
                 try:
                     shutil.rmtree(directory)
@@ -170,7 +174,7 @@ def divide_values(file):
             for item in file[1:]:
                 emails.append(item[0])
                 groups.append(item[1:])
-                # FEAT: These two extract the groups and emails into two lists
+# FEAT: These two extract the groups and emails into two lists
             groups = [item for group in groups for item in group]
             groups = list(set(groups))
             return api_csv_parse(emails, groups)
@@ -179,7 +183,7 @@ def divide_values(file):
         elif selection == "some-groups":
             submissions = []
             for item in file[1:]:
-                # FEAT: This extracts each row as a list. Perfect for Learners in Specific Groups.
+# FEAT: This extracts each row as a list. Perfect for Learners in Specific Groups.
                 submissions.append(item)
             for item in submissions:
                 emails.append(item[0])
@@ -427,19 +431,26 @@ def save_templates_backup(templates):
 @app.route("/download_templates", methods=["GET", "POST"])
 @key_required
 def download_templates():
-    zipped_file = f"{session['sani_school']}.zip"
+    zipped_file = f"{session['sani_school']}"
     zipped_file = zipped_file.replace(" ", "")
     zipped_file = zipped_file.replace("'", "")
     os.chdir = session["client_path"]
-    # zipped_file = os.path.join(session["client_path"], zipped_file)
     file_path = session["client_path"]
     zipped_path = os.path.join(TEMPLATES_FOLDER, zipped_file)
     download = shutil.make_archive(zipped_path, 'zip', file_path)
 
     return send_file(download, as_attachment=True)
 
-def delete_zip():
-    pass
+@app.after_request
+def delete_zip(response):
+    zipped_path = TEMPLATES_FOLDER
+    wildcard = glob.glob(zipped_path + ".zip")
+    for zipfile in wildcard:
+        try:
+            shutil.rmtree(zipfile)
+        except OSError:
+            print(OSError)
+    return response
 
 @app.route("/undo_template", methods=["POST"])
 @key_required
@@ -448,17 +459,6 @@ def undo_template():
         if request.form["undo_templates"]:
             pass
 
-
 @app.route("/stop", methods=["POST"])
 def stop():
     print("stopping")
-
-    # flask.session.permanent = False
-    # app.permanent_session_lifetime = datetime.timedelta(minutes=20)
-    # flask.session.modified = True
-    # flask.secret_key = "@&I\x1a?\xce\x94\xbb0w\x17\xbf&Y\xa2\xc2(A\xf5\xf2\x97\xba\xeb\xfa"
-
-
-# if __name__ == "__main__":
-#    socketio.run(app, debug=True)
-#    ask_key()
