@@ -5,7 +5,10 @@ import re
 import os
 import csv
 import glob
+import time
+import pandas as pd
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 from functools import wraps
 import flask
 from flask import (
@@ -39,13 +42,19 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 specials = '"!@#$%^&*()-+?_=,<>/"'
 url = "https://api.northpass.com/"
 
-
+@app.route("/downloadcsv", methods=["GET", "POST"])
 def download_csv():
     if request.method == "GET":
         download = make_response(session["dfcsv"])
         download.headers["Content-Disposition"] = "attachment; filename=export.csv"
         download.headers["Content-Type"] = "text/csv"
         return download
+
+@app.route("/send_to_admin")
+def send_to_admin():
+    if request.method == "GET":
+        url = f"https://app.northpass.com/app/admin/{session['admin_id']}"
+        return redirect(url)
 
 
 def key_response(response):
@@ -62,6 +71,7 @@ def correct_key(response):
     data = response.json()
     session["raw_school"] = data["data"]["attributes"]["properties"]["name"]
     session["sani_school"] = session["raw_school"].replace("[", "").replace("]", "")
+    session["admin_id"] = data["data"]["id"]
     session["client_path"] = os.path.join(TEMPLATES_FOLDER, session["sani_school"])
     return render_template("home.html", title="Active Session")
 
@@ -174,7 +184,7 @@ def divide_values(file):
             for item in file[1:]:
                 emails.append(item[0])
                 groups.append(item[1:])
-# FEAT: These two extract the groups and emails into two lists
+            # FEAT: These two extract the groups and emails into two lists
             groups = [item for group in groups for item in group]
             groups = list(set(groups))
             return api_csv_parse(emails, groups)
@@ -183,7 +193,7 @@ def divide_values(file):
         elif selection == "some-groups":
             submissions = []
             for item in file[1:]:
-# FEAT: This extracts each row as a list. Perfect for Learners in Specific Groups.
+                # FEAT: This extracts each row as a list. Perfect for Learners in Specific Groups.
                 submissions.append(item)
             for item in submissions:
                 emails.append(item[0])
@@ -437,20 +447,111 @@ def download_templates():
     os.chdir = session["client_path"]
     file_path = session["client_path"]
     zipped_path = os.path.join(TEMPLATES_FOLDER, zipped_file)
-    download = shutil.make_archive(zipped_path, 'zip', file_path)
-
+    download = shutil.make_archive(zipped_path, "zip", file_path)
+    delete_zip()
     return send_file(download, as_attachment=True)
 
-@app.after_request
-def delete_zip(response):
+
+def delete_zip():
+    print("Sleeping...")
+    time.sleep(5)
     zipped_path = TEMPLATES_FOLDER
-    wildcard = glob.glob(zipped_path + ".zip")
-    for zipfile in wildcard:
+    wildcard = glob.glob(zipped_path + "*.zip")
+    wildcard = str(wildcard)
+    wildzip = wildcard[-5:-2]
+    if wildzip == "zip":
         try:
-            shutil.rmtree(zipfile)
+            path = Path(wildcard)
+            print(path)
+            shutil.rmtree(path)
         except OSError:
             print(OSError)
-    return response
+    return
+
+
+@app.route("/get_info", methods=["GET", "POST"])
+@key_required
+def get_info():
+    return render_template("get_info.html", title="Get Customer Information")
+
+
+@app.route("/get_info/<variable>", methods=["GET", "POST"])
+@key_required
+def get_courses(variable):
+    count = 0
+    courses = []
+    cats = []
+    course_dict = {}
+    if request.method == "POST":
+        while True:
+            count += 1
+            url = f"https://api.northpass.com/v2/courses?page={count}"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            for response in data["data"]:
+                status = response["attributes"]["status"]
+                uuid = response["id"]
+                name = response["attributes"]["name"]
+                ecount = response["attributes"]["enrollments_count"]
+                created = response["attributes"]["created_at"]
+                update = response["attributes"]["updated_at"]
+                unpub = response["attributes"]["unpublished_changes"]
+                course_dict = {
+                    "Id": uuid,
+                    "Name": name,
+                    "Status": status,
+                    "Enrollments": ecount,
+                    "Created At": created,
+                    "Last Updated": update,
+                    "Unpublished Changes?": unpub,
+                }
+                cat_id = response["relationships"]["categories"]["data"]
+                headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+                cats = []
+                if len(cat_id) == 0:
+                    pass
+                elif len(cat_id) == 1:
+                    categoryid = cat_id[0]["id"]
+                    url = f"https://api.northpass.com/v2/categories/{categoryid}"
+                    cat_resp = requests.get(url, headers=headers)
+                    cat_data = cat_resp.json()
+                    cat_name = cat_data["data"]["attributes"]["name"]
+                    cats.append(cat_name)
+                    course_dict.update({"Categories": cats})
+                else:
+                    for item in cat_id:
+                        categoryid = item["id"]
+                        url = f"https://api.northpass.com/v2/categories/{categoryid}"
+                        cat_resp = requests.get(url, headers=headers)
+                        cat_data = cat_resp.json()
+                        cat_name = cat_data["data"]["attributes"]["name"]
+                        cats.append(cat_name)
+                        course_dict.update({"Categories": cats})
+
+                try:
+                    courses.append(course_dict)
+                except TypeError as e:
+                    print(f"Error: {e}")
+                finally:
+                    pd.set_option("display.max_colwidth", 30)
+                    df = pd.DataFrame.from_records(courses)
+                    df.iloc[-1] = df.iloc[-1].astype(str).str.replace("[\]\[]",'')
+                    df.fillna('', inplace=True)
+                    table = df.to_html()
+                    session["dfcsv"] = df.to_csv()
+
+            if data["data"] == []:
+                break
+
+        return render_template("get_info.html",
+                              title="Course Information",
+                              table=table)
+
+    return "You didn't post up"
+
+
 
 @app.route("/undo_template", methods=["POST"])
 @key_required
@@ -458,6 +559,7 @@ def undo_template():
     if request.method == "POST":
         if request.form["undo_templates"]:
             pass
+
 
 @app.route("/stop", methods=["POST"])
 def stop():

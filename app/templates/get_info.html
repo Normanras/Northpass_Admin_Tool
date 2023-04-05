@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+{% include 'subheader.html' %}
+{% block content %}
+{% if table %}
+{% include 'table.html' %}
+{% endif %}
+{% endblock %}

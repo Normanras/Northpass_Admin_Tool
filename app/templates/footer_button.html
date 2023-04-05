@@ -1,0 +1,17 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<div class="floating-container">
+  <div class="floating-button">+</div>
+  <div class="element-container">
+    <a href="https://app.northpass.com/admin/schools/{{ session.admin_id }}">
+      <span class="float-element">
+	<i class="material-icons">admin_panel_settings</i>
+      </span>
+    {% if table %}
+    <a id="download" href="/downloadcsv">
+      <span class="float-element tooltip-left">
+      <i class="material-icons">download_for_offline
+      </i></a>
+    </span>
+    {% endif %}
+  </div>
+</div>
