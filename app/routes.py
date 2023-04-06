@@ -7,6 +7,7 @@ import csv
 import glob
 import time
 import pandas as pd
+from urllib.parse import urlparse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from functools import wraps
@@ -86,8 +87,17 @@ def key_required(check):
         if session.get("key") is None:
             return redirect("/", code=302)
         return check(*args, **kwargs)
-
     return decorated_function
+
+def grab_subdomain():
+    endpoint = "/v2/courses"
+    headers = {"accept":"application/json", "X-Api-Key":session["key"]}
+    response = requests.get(url+endpoint, headers=headers)
+    data2 =  response.json()["data"][0]["links"]["enroll"]["href"]
+    data = urlparse(data2)
+    data = str("https://" + data.netloc)
+    print(data)
+    session["subdomain"] = data
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -108,7 +118,9 @@ def ask_key():
             endpoint = "/v2/properties/school"
             headers = {"accept": "application/json", "X-Api-Key": session["key"]}
             response = requests.get(url + endpoint, headers=headers)
+            grab_subdomain()
             return key_response(response)
+
         error = "Hm. That doesn't seem right"
         session.clear()
         return render_template("index.html", title="Home", error=error)
@@ -336,7 +348,7 @@ def load_templates():
 
     while True:
         count += 1
-        endpoint = "v2/custom_templates"
+        endpoint = f"v2/custom_templates?page={count}"
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
@@ -344,7 +356,6 @@ def load_templates():
         }
         response = requests.get(url + endpoint, headers=headers)
         data = response.json()
-        nextlink = data["links"]
         for response in data["data"]:
             last_updated = response["attributes"]["updated_at"].split("T")
             full_updated = response["attributes"]["updated_at"]
@@ -357,17 +368,15 @@ def load_templates():
             )
             templates.append((name, body, last_updated))
 
-        if "next" not in nextlink:
+        if data["data"] == []:
             break
 
-        save_templates_backup(templates)
-        return render_template(
-            "templates.html",
-            title="Templates",
-            templates=templates,
-        )
-
-    return render_template("options.html")
+    save_templates_backup(templates)
+    return render_template(
+        "templates.html",
+        title="Templates",
+        templates=templates,
+    )
 
 
 @app.route("/templates", methods=["GET", "POST"])
@@ -475,9 +484,10 @@ def get_info():
     return render_template("get_info.html", title="Get Customer Information")
 
 
-@app.route("/get_info/<variable>", methods=["GET", "POST"])
+@app.route("/get_courses", methods=["GET", "POST"])
 @key_required
-def get_courses(variable):
+def get_courses():
+    print("course function running")
     count = 0
     courses = []
     cats = []
@@ -537,9 +547,9 @@ def get_courses(variable):
                 finally:
                     pd.set_option("display.max_colwidth", 30)
                     df = pd.DataFrame.from_records(courses)
-                    df.iloc[-1] = df.iloc[-1].astype(str).str.replace("[\]\[]",'')
+                    # df.iloc[-1] = df.iloc[-1].astype(str).str.replace("[\]\[]",'')
                     df.fillna('', inplace=True)
-                    table = df.to_html()
+                    courses_table = df.to_html()
                     session["dfcsv"] = df.to_csv()
 
             if data["data"] == []:
@@ -547,12 +557,75 @@ def get_courses(variable):
 
         return render_template("get_info.html",
                               title="Course Information",
-                              table=table)
+                              table=courses_table)
 
     return "You didn't post up"
 
+@app.route("/get_groups", methods=["GET", "POST"])
+@key_required
+def get_groups():
+    print("groups function running")
+    count = 0
+    groups = []
+    group_dict = {}
+    if request.method == "POST":
+        while True:
+            count += 1
+            url = f"https://api.northpass.com/v2/groups?page={count}"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            print(data)
+
+            for response in data["data"]:
+                uuid = response["id"]
+                name = response["attributes"]["name"]
+                ecount = response["attributes"]["membership_count"]
+                created = response["attributes"]["created_at"]
+                update = response["attributes"]["updated_at"]
+                elink = response["attributes"]["group_enrollment_link"]
+                group_dict = {
+                    "Id": uuid,
+                    "Name": name,
+                    "Members": ecount,
+                    "Created At": created,
+                    "Last Updated": update,
+                    "Enrollment Link":elink,
+                }
+                try:
+                    groups.append(group_dict)
+                except TypeError as e:
+                    print(f"Error: {e}")
+                finally:
+                    pd.set_option("display.max_colwidth", 30)
+                    df = pd.DataFrame.from_records(groups)
+                   #  df.iloc[-1] = df.iloc[-1].astype(str).str.replace("[\]\[]",'')
+                    df.fillna('', inplace=True)
+                    groups_table = df.to_html()
+                    session["dfcsv"] = df.to_csv()
+            if data["data"] == []:
+                break
+        return render_template("get_info.html",
+                              title="Course Information",
+                              table=groups_table)
+    return "You didn't post up"
 
 
+@app.route("/get_people", methods=["GET", "POST"])
+@key_required
+def get_people():
+    print("groups function running")
+    count = 0
+    groups = []
+    group_dict = {}
+    if request.method == "POST":
+        while True:
+            count += 1
+            url = f"https://api.northpass.com/v2/groups?page={count}"
+            headers = {"accept": "application/json", "X-Api-Key": session["key"]}
+            response = requests.get(url, headers=headers)
+            data = response.json()
+            print(data)
 @app.route("/undo_template", methods=["POST"])
 @key_required
 def undo_template():

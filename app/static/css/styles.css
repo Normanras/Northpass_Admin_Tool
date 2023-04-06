@@ -192,6 +192,9 @@ justify-content: space-evenly;
   justify-content: space-evenly;
 }
 
+.subdom-link { color: #089FB7; }
+.subdom-link:hover { color: #F05323; }
+
 #templates {
   width: 75%;
 }
@@ -279,11 +282,6 @@ ul {
   padding: 0;
 }
 
-html, body {
-  background: #eaedf2;
-  font-family: 'Roboto', sans-serif;
-}
-
 .floating-container {
   position: fixed;
   width: 100px;
@@ -293,7 +291,7 @@ html, body {
   margin: 35px 25px;
 }
 .floating-container:hover {
-  height: 200px;
+  height: 280px;
 }
 .floating-container:hover .floating-button {
   box-shadow: 0 10px 25px rgba(44, 179, 240, 0.6);
@@ -352,17 +350,18 @@ html, body {
 }
 .floating-container .float-element .material-icons {
   vertical-align: middle;
+  color: white;
   font-size: 16px;
 }
 .floating-container .float-element:nth-child(1) {
-  background: #42A5F5;
-  box-shadow: 0 20px 20px -10px rgba(66, 165, 245, 0.5);
+  background: #F05323;
+  box-shadow: 0 20px 20px -10px rgba(240, 84, 36, 0.5);
 }
 .floating-container .float-element:nth-child(2) {
-  background: #4CAF50;
-  box-shadow: 0 20px 20px -10px rgba(76, 175, 80, 0.5);
+  background: #FED109;
+  box-shadow: 0 20px 20px -10px rgba(255, 209, 10, 0.5);
 }
 .floating-container .float-element:nth-child(3) {
-  background: #FF9800;
-  box-shadow: 0 20px 20px -10px rgba(255, 152, 0, 0.5);
+  background: #089FB7;
+  box-shadow: 0 20px 20px -10px rgba(08, 159, 183, 0.5);
 }

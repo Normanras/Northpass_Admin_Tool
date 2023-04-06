@@ -3,6 +3,18 @@
 {% include 'header.html' %}
 {% include 'logo.html' %}
 {% block content %}
-<h2>Academy: {{ session.raw_school }}.</h2>
+</br>
+</br>
+<h2>Academy: {{ session.raw_school }}</h2>
+<p>&nbsp</p>
+<h3>Subdomain:
+ <a class="subdom-link" href={{ session.subdomain }}>{{ session.subdomain }}
+ </a>
+</h3>
 
 {% endblock %}
+
+<style>
+.subdom-link { color: #089FB7; }
+.subdom-link:hover { color: #F05323; }
+</style>
