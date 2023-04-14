@@ -33,6 +33,7 @@
     <h2> {{ templates[0] }}</h2>
     <h3> Last Updated:  {{ templates [2] }}</h3>
   <code-input
+      class="line-numbers"
 	lang="HTML"
 	value="{{ templates[1] }}"
 	id="editor"
@@ -62,7 +63,7 @@
 {% if templates %}
 <h3> Advanced users only: create new template </h3>
 <p>&nbsp;</p>
-<div class="html_code">
+<div class="html_code" style="display: flex;justify-content: center;">
   <form
     id="templates"
     action="{{ url_for('templates')}}"
@@ -71,6 +72,7 @@
       Enter the code below
     </h2>
   <code-input
+	class="line-numbers"
 	lang="HTML"
 	id="editor"
 	name="body"

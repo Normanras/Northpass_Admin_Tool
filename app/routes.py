@@ -27,10 +27,10 @@ from werkzeug.utils import secure_filename
 from app import app
 
 UPLOAD_FOLDER = (
-    "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/csv/"
+    "./app/static/files/csv/"
 )
 TEMPLATES_FOLDER = (
-    "/Users/normrasmussen/Documents/Projects/CSM_webapp/app/static/files/templates/"
+    "./app/static/files/templates/"
 )
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMPLATES_FOLDER"] = TEMPLATES_FOLDER
@@ -637,3 +637,6 @@ def undo_template():
 @app.route("/stop", methods=["POST"])
 def stop():
     print("stopping")
+
+if __name__ == "__main__":
+    app.run(debug=True)
