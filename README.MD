@@ -1,5 +1,5 @@
 <p align="center">
-<h1> Northpass Admin App </h1>
+Northpass Admin App
 </p>
 <p align="center">
   <img src="./imgs/northpass_admin_app.gif?raw=true" alt="Northpass Templates Preview">
