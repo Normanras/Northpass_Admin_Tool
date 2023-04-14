@@ -26,8 +26,8 @@ The app offers the following security considerations:
 
 Todo List & Warnings:
 
-[] Add additional functions for "Get Info" section
-[] Create function that deletes all files created during the Session.
+* [] Add additional functions for "Get Info" section
+* [] Create function that deletes all files created during the Session.
 
 !!! *What this last one means is that if you use this app frequently or across many academies, you could easily take up unnecessary space! It is recommended to clean, destroy, and re-create the image every once in a while.* !!!
 
