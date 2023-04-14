@@ -1,5 +1,5 @@
 
-/* Custom Variables | Color Scheme */
+/* 1.0 - Foundational Styling */
 
 :root {
   --primary:  #66C92D;
@@ -49,6 +49,8 @@ html {
   justify-content: center;
 }
 
+/* 1.1 - Dataframe and Table Styling */
+
 input,
 select {
   width: 200px;
@@ -79,6 +81,8 @@ select {
   background: #CCD4D8;
 }
 
+/* Titles and Header Copy/Test */
+
 h1 {
   font-size: 4rem;
   font-weight: bold;
@@ -97,12 +101,14 @@ img {
   height: 80px;
 }
 
-.main {
+.logo-div {
   margin: 4px;
   flex-wrap: wrap;
   padding: 25px;
   justify-content: center;
 }
+
+/* 1.? - Header and Navigation Bar Styling */
 
 .header {
   margin: 0;
@@ -118,18 +124,37 @@ img {
   display: flex;
   height: 48px;
   padding: 8px 16px;
+  text-decoration: none;
+
 }
 
 .nav-link {
   text-decoration: none;
 }
 
-li {
+.instructions-list{
+  display:flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.instructions-left
+.instructions-right {
   display: flex;
+  align-items: center;
+}
+
+li {
+  display: block;
 }
 
 .button-background {
   margin-right: 8px;
+}
+
+.radio-options {
+  display: flex;
+  justify-content: inherit;
 }
 
 .navbutton {
@@ -140,8 +165,38 @@ li {
   cursor: pointer;
   font-size: 14px;
   line-height: 16px;
-  text-decoration: none;
   padding: 8px 16px 8px 12px;
+}
+
+.man-csv-opts {
+  display: flex;
+justify-content: space-evenly;
+
+}
+.csv-upload {
+  align-items: right;
+}
+
+.navoption {
+  color: var(--background);
+  text-decoration: none;
+}
+
+.window-body {
+  display: flex;
+  justify-content: space-around;
+}
+
+.get_opts{
+  display:flex;
+  justify-content: space-evenly;
+}
+
+.subdom-link { color: #089FB7; }
+.subdom-link:hover { color: #F05323; }
+
+#templates {
+  width: 75%;
 }
 
 #currentDate {
@@ -153,13 +208,18 @@ li {
   font-weight: 600;
 }
 
+.header {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+#editor{
+  height:550px;
+}
+
 @media screen and (max-width: 1250px) {
   h1 {
     display: flex;
-  }
-
-  .header {
-    flex-direction: column-reverse;
   }
 
   #currentTime {
@@ -172,70 +232,136 @@ li {
   }
 }
 ul {
-  display: flex;
+  display: block;
+  text-align: center;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 100px;
-  grid-gap: 2rem;
-  padding: 20px;
+
+@-webkit-keyframes come-in {
+  0% {
+    -webkit-transform: translatey(100px);
+            transform: translatey(100px);
+    opacity: 0;
+  }
+  30% {
+    -webkit-transform: translateX(-50px) scale(0.4);
+            transform: translateX(-50px) scale(0.4);
+  }
+  70% {
+    -webkit-transform: translateX(0px) scale(1.2);
+            transform: translateX(0px) scale(1.2);
+  }
+  100% {
+    -webkit-transform: translatey(0px) scale(1);
+            transform: translatey(0px) scale(1);
+    opacity: 1;
+  }
+}
+@keyframes come-in {
+  0% {
+    -webkit-transform: translatey(100px);
+            transform: translatey(100px);
+    opacity: 0;
+  }
+  30% {
+    -webkit-transform: translateX(-50px) scale(0.4);
+            transform: translateX(-50px) scale(0.4);
+  }
+  70% {
+    -webkit-transform: translateX(0px) scale(1.2);
+            transform: translateX(0px) scale(1.2);
+  }
+  100% {
+    -webkit-transform: translatey(0px) scale(1);
+            transform: translatey(0px) scale(1);
+    opacity: 1;
+  }
+}
+* {
+  margin: 0;
+  padding: 0;
 }
 
-.card {
-  background-color: #089FB7;
-  padding: 5px;
-  border-radius: 10px;
-  border: 1px solid #66C92D;
-  color: #FFFFFF;
+.floating-container {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  bottom: 0;
+  right: 0;
+  margin: 35px 25px;
 }
-/*
-.card:link,
-.card:visited {
+.floating-container:hover {
+  height: 280px;
+}
+.floating-container:hover .floating-button {
+  box-shadow: 0 10px 25px rgba(44, 179, 240, 0.6);
+  -webkit-transform: translatey(5px);
+          transform: translatey(5px);
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.floating-container:hover .element-container .float-element:nth-child(1) {
+  -webkit-animation: come-in 0.4s forwards 0.2s;
+          animation: come-in 0.4s forwards 0.2s;
+}
+.floating-container:hover .element-container .float-element:nth-child(2) {
+  -webkit-animation: come-in 0.4s forwards 0.4s;
+          animation: come-in 0.4s forwards 0.4s;
+}
+.floating-container:hover .element-container .float-element:nth-child(3) {
+  -webkit-animation: come-in 0.4s forwards 0.6s;
+          animation: come-in 0.4s forwards 0.6s;
+}
+.floating-container .floating-button {
+  position: absolute;
+  width: 65px;
+  height: 65px;
+  background: #66C92E;
+  bottom: 0;
+  border-radius: 50%;
+  left: 0;
+  right: 0;
+  margin: auto;
   color: white;
-  text-decoration: none;
-
-  margin: 1.2rem;
-  padding: 4rem 8rem;
-
-  background-color: var(--background-light);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  overflow: hidden;
+  line-height: 65px;
+  text-align: center;
+  font-size: 23px;
+  z-index: 100;
+  box-shadow: 0 10px 25px -5px rgba(44, 179, 240, 0.6);
   cursor: pointer;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+.floating-container .float-element {
   position: relative;
-
-  outline: none;
-  transition: 0.1s;
-}*/
-
-.card:hover,
-.card:focus {
-  transform: scale(1.02);
+  display: block;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 15px auto;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  line-height: 50px;
+  z-index: 0;
+  opacity: 0;
+  -webkit-transform: translateY(100px);
+          transform: translateY(100px);
 }
-
-.card:focus > .card__name {
-  bottom: 0;
+.floating-container .float-element .material-icons {
+  vertical-align: middle;
+  color: white;
+  font-size: 16px;
 }
-
-.card:hover > .card__name {
-  bottom: 0;
+.floating-container .float-element:nth-child(1) {
+  background: #F05323;
+  box-shadow: 0 20px 20px -10px rgba(240, 84, 36, 0.5);
 }
-
-.card__icon {
-  font-size: 2rem;
-  padding: 1rem;
-  display: grid;
+.floating-container .float-element:nth-child(2) {
+  background: #FED109;
+  box-shadow: 0 20px 20px -10px rgba(255, 209, 10, 0.5);
 }
-
-.card__name {
-  font-weight: 400;
-  transform: translate(-50%, -50%);
-  position: relative;
-  left: 50%;
-  transition: 0.1s;
+.floating-container .float-element:nth-child(3) {
+  background: #089FB7;
+  box-shadow: 0 20px 20px -10px rgba(08, 159, 183, 0.5);
 }

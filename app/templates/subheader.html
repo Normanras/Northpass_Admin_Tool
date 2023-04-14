@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+      <div class="get_opts">
+
+	  <form class="navbutton"
+		id="get_courses"
+		action="{{ url_for('get_courses')}}"
+		method="post">
+	    <a class="navoption"
+	       onclick="document.forms['get_courses'].submit()"
+	      style="cursor:pointer;">
+	    <p class="navselection">Get Courses</p>
+	    </a>
+	  </form>
+
+	  <form class="navbutton"
+		id="get_groups"
+		action="{{ url_for('get_groups')}}"
+		method="post">
+	    <a class="navoption"
+	       onclick="document.forms['get_groups'].submit()"
+	      style="cursor:pointer;">
+	    <p class="navselection">Get Groups</p>
+	    </a>
+	  </form>
+      </div>

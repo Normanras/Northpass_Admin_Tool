@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-{% extends 'head.html' %}
-{% include 'header.html' %}
-{% include 'logo.html' %}
-{% block content %}
-
-<h3> If you'd like to upload a CSV. Please do so here:<h3>
+<div class="csv-upload">
+<h3> If you'd like to upload a CSV. Please do so here:</h3>
   <p></p>
-  <form method="post" action="" enctype="multipart/form-data">
+  <form method="POST"
+    action="{{ url_for('upload_file') }}"
+    enctype="multipart/form-data">
    <p><input type="file" name="file"></p>
-   <p><input type="submit" value="Submit CSV"></p>
+    <div class="radio-options">
+      <input type="radio" id="all-groups" name="learner-groups" value="all-groups" checked>
+      <label for="learner-groups">All Learners in All Groups</label>
+    </div>
+     <div class="radio-options">
+      <input type="radio" id="some-groups" name="learner-groups" value="some-groups">
+      <label for="learner-groups">Learners Only in Adjacent Groups</label>
+    </div>
+    <input type="submit" name="preview" value="Preview"></input>
+    <input type="submit" name="submit" value="Submit to Academy"></input>
   </form>
-
-{% if table %}
-  {% include 'table.html' %}
-{% else %}
-<p></p>
-{% endif %}
-
-{% endblock %}
+</div>
 

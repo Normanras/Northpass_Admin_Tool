@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+<p>&nbsp;</p>
+{% if error %}
+<h3>{{ error }}</h4>
+{% endif %}
+
+
+{% if button %}
+<br>
+<form
+    id="undo_template"
+    method="post"
+    action="{{ url_for('undo_template')}}">
+  <input type="submit" name="undo_template" value="Undo Last Upload"></input>
+</form>
+{% endif %}
+
+{% if templates %}
+<h2> Here are the liquid templates for </h2>
+<h2 style="color:#F05323"><strong> {{ session.raw_school }} </strong></h2>
+{% endif %}
+<div class="templates_display" >
+{% for templates in templates %}
+  <p>&nbsp;</p>
+<div class="window-body">
+  <form
+    id="templates"
+    action="{{ url_for('templates')}}"
+    method="post">
+    <h2> {{ templates[0] }}</h2>
+    <h3> Last Updated:  {{ templates [2] }}</h3>
+  <code-input
+      class="line-numbers"
+	lang="HTML"
+	value="{{ templates[1] }}"
+	id="editor"
+	name="body"
+	template="code-input">
+      {{ templates[1] }}
+    </code-input>
+  <label for="template_name">
+    Create New Template Name (optional):
+  </label>
+  <input
+      type="text"
+      name="template_name"
+      value="{{ templates[0] }}">
+  </input>
+  <p>&nbsp;</p>
+  <input
+    type="submit"
+    name="submit-template"
+    value="Submit Template">
+  </input>
+  </form>
+</div>
+</div>
+  <p>&nbsp;</p>
+{% endfor %}
+{% if templates %}
+<h3> Advanced users only: create new template </h3>
+<p>&nbsp;</p>
+<div class="html_code" style="display: flex;justify-content: center;">
+  <form
+    id="templates"
+    action="{{ url_for('templates')}}"
+    method="post">
+    <h2>
+      Enter the code below
+    </h2>
+  <code-input
+	class="line-numbers"
+	lang="HTML"
+	id="editor"
+	name="body"
+	template="code-input"
+	style="height:550px;">
+    </code-input>
+  <p>&nbsp;</p>
+  <label for="template_name">
+    Template Name:
+  </label>
+  <input
+      type="text"
+      name="template_name">
+  </input>
+  <p>&nbsp;</p>
+  <input type="submit" name="submit_template" value="Submit Template"</input>
+  </form>
+</div>
+{% endif %}
+  <script>
+    codeInput.registerTemplate("code-input", codeInput.templates.hljs(hljs,
+      [
+      ]));
+  </script>
+  <script>
+    codeInput.registerTemplate("code-input", codeInput.templates.prism(Prism, []));
+  </script>
+{% include 'footer_button.html'%}

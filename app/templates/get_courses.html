@@ -1,21 +1,8 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Northpass CSM Bulk Actions</title>
-	</head>
-	<body>
-	  <header class="topnav">
-	    <div class="logo_container">
-	      <img src="/static/NP-Logo-Primary-FC.png" alt="Northpass Full Color Logo"></img>
-	    </div>
-	  </header>
-	  <h1>Hello! Please select what you'd like to do.</h1>
-	  <form action="{{ url_for("get_courses")}}" method="post">
-	  <label for="apikey">API Key:</label>
-	  <input type="text" id="api" name="apikey"/>
-	  <button type="submit">Submit</button>
-	  </form>
-	  </div>
-	</body>
-</html>
-
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+{% include 'subheader.html' %}
+{% block content %}
+{% include 'table.html' %}
+{% endblock %}

@@ -1,48 +1,61 @@
 <!DOCTYPE html>
       <header class="header">
 
-	<ul class="header_opts">
-	  <form class="navbutton" action="{{ url_for('render_home')}}">
-	    <a href="{{ url_for('render_home')}}">
-	      <div class="icon-background">
-		<i class="ri-home-line"></i>
-	      </div>
-	      Home
+	  <form class="navbutton"
+		id="render_home"
+		action="{{ url_for('render_home')}}"
+		method="post">
+	    <a class="navoption"
+	      onclick="document.forms['render_home'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-home-line card__icon"></i>
+	    <p class="navselection">Home</p>
 	    </a>
 	  </form>
 
-	  <form class="navbutton"
-	    action="{{ url_for('get_people')}}"
+	<form class="navbutton"
+	    id="get_info"
+	    action="{{ url_for('get_info')}}"
 	    method="post">
 	    <a class="navoption"
-	      onclick="document.forms['get_people'].submit()"
+	      onclick="document.forms['get_info'].submit()"
 	      style="cursor:pointer;">
-	    <i class="ri-car-line card__icon"></i>
-	    <p class="navselection">Get People</p>
+	    <i class="ri-cloud-line card__icon"></i>
+	    <p class="navselection">Get Info</p>
+	    </a>
+	  </form>
+
+	<form class="navbutton"
+	    id="bulk_add_opts"
+	    action="{{ url_for('bulk_add_opts')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['bulk_add_opts'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-send-plane-line card__icon"></i>
+	    <p class="navselection">Bulk Add</p>
+	    </a>
 	  </form>
 
 	  <form class="navbutton"
-		id="get_people"
-		action="{{ url_for('get_people')}}"
-		method="post">
-	    <a class="navoption" onclick="document.forms['get_people'].submit()" class="nav-link">
-	      <div class="icon-background">
-	    <i class="ri-home-line"></i>
-	      </div>
-	    Get People
+	    id="load_templates"
+	    action="{{ url_for('load_templates')}}"
+	    method="post">
+	    <a class="navoption"
+	      onclick="document.forms['load_templates'].submit()"
+	      style="cursor:pointer;">
+	    <i class="ri-car-line card__icon"></i>
+	    <p class="navselection">Templates</p>
 	    </a>
 	  </form>
 
-	  <form
-	    class="navbutton"
-	    id="get_courses"
-	    action="{{ url_for('get_courses')}}"
-	    method="post">
-	    <a onclick="document.forms['get_courses'].submit()" class="nav-link">
-	      <div class="icon-background">
-	    <i class="ri-briefcase-line"></i>
-	      </div>
-	    Get Courses
+	  <form class="navbutton">
+	    <a class = "navoption"
+	       href="{{ url_for('clear_session')}}"
+	      style="cursor:pointer;">
+	    <i class="ri-scissors-line card__icon"></i>
+	    <p class="navselection">New Customer</p>
 	    </a>
 	  </form>
+
       </header>

@@ -1,0 +1,23 @@
+<div class="floating-container">
+  <div class="floating-button">+</div>
+  <div class="element-container">
+
+    <a href="https://app.northpass.com/admin/schools/{{ session.admin_id }}">
+      <span class="float-element tooltip-left">
+	<i class="material-icons">admin_panel_settings
+	</i> </a> </span>
+
+      <span class="float-element">
+	<a href="#top">
+	<i class="material-icons">vertical_align_top
+	</i> </a> </span>
+
+  {% if table %}
+  <span class="float-element">
+    <a id="download" href="/downloadcsv">
+      <i class="material-icons">download_for_offline
+      </i> </a> </span>
+    {% endif %}
+
+  </div>
+</div>

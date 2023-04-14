@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% include 'head.html' %}
+{% include 'header.html' %}
+{% include 'logo.html' %}
+{% block content %}
+<h2>You're currently accessing {{ session.raw_school }}.</h2>
+	<h2>&nbsp;</h2>
+ <div class="instructions-list">
+  <div class="instructions-left">
+ <ul>
+  <li> <h3>Left side - Manual entry:</h3>
+    <ul>
+     <li> Both fields don't need to be filled out!</li>
+     <li> You can add just people or just groups.</li>
+     <li> Using both fields will add all people to all groups.</li>
+    </ul>
+  </li>
+ </ul>
+  </div>
+
+  <div class="instructions-right">
+   <ul>
+    <li> <h3>Right side - CSV Upload:</h3>
+   <ul>
+     <li> The Header rows must be <strong>Email</strong> and/or <strong>Groups</strong></li>
+     <li> Please format the csv like this:</li>
+     <li> Email,Groups</li>
+     <li> email@email.com, group1, group2, group3 </li>
+      <li> email2@email.com, group5, group1 </li>
+   </ul>
+  </li>
+ </ul>
+  </div>
+ </div>
+ <p>&nbsp;</p>
+{% if error %}
+	<p class=error><strong> </strong>{{ error }}</p>
+	{% endif %}
+ <p>&nbsp;</p>
+ <div class="man-csv-opts">
+  <div class="manual-opts">
+	<p><label for="Bulk Add"> Each item must be comma separated or placed on a
+  new line.</label></p>
+	  <form action="{{ url_for("bulk_add")}}" method="post">
+	    <p>Emails</p>
+	    <textarea id="emails" name="emails" rows="4" cols="50"></textarea>
+	    <p>Group Names</p>
+	    <textarea id="groups" name="groups" rows="4" cols="50"></textarea>
+	    <p></p>
+	      <input type="submit" value="Submit"></input>
+	   </form>
+  </div>
+    {% include 'csv.html' %}
+  </div>
+ </div>
+ {% if table %}
+  {% include 'table.html' %}
+ {% endif %}
+{% endblock %}
