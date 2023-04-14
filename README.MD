@@ -1,4 +1,4 @@
-<p align="center" style="font-size: 45px;"> <strong> Northpass Admin App </strong></p>
+<h1 align="center"> Northpass Admin App </h1>
 <p align="center">
   <img src="./imgs/northpass_admin_app.gif?raw=true" alt="Northpass Templates Preview">
 </p>
