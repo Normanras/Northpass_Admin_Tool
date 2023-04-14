@@ -1,4 +1,6 @@
-# Northpass Admin Side Project
+<p align="center"><h1> Northpass Admin App<h1>
+  <img src="./imgs/northpass_admin_app.gif?raw=true" alt="Northpass Templates Preview"/>
+</p>
 
 ## Overview
 
