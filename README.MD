@@ -72,5 +72,5 @@ Below are a few screenshots of the project.
 ![Courses Info](./imgs/courses.png)
 ![Group Info](./imgs/groups.png)
 ![Bulk Upload Page](./imgs/bulk-upload.png)
-![Templates](./imgs/bulk-upload.png)
+![Templates](./imgs/templates.png)
 ![Session Cleared](./imgs/session-cleared.png)
